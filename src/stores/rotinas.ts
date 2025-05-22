@@ -45,16 +45,37 @@ export const useRotinasStore = defineStore('rotinas', {
 
   getters: {
     rotinasFiltradas: (state) => {
+      // Obter o dia da semana atual quando nenhum dia está selecionado
+      let diasFiltro = state.filtro.diasSemana;
+      
+      if (diasFiltro.length === 0) {
+        const hoje = new Date();
+        const diaSemanaHoje = hoje.getDay(); // 0 = Domingo, 1 = Segunda, etc.
+        
+        const diasSemanaMap: Record<number, DiaSemana> = {
+          0: 'domingo',
+          1: 'segunda',
+          2: 'terca',
+          3: 'quarta',
+          4: 'quinta',
+          5: 'sexta',
+          6: 'sabado'
+        };
+        
+        const diaHoje = diasSemanaMap[diaSemanaHoje];
+        diasFiltro = [diaHoje];
+      }
+      
       return state.rotinas.filter(rotina => {
-        const matchDias = state.filtro.diasSemana.length === 0 || 
-          rotina.diasSemana.some(dia => state.filtro.diasSemana.includes(dia))
+        // Verifica se a rotina tem algum dos dias selecionados no filtro
+        const matchDias = rotina.diasSemana.some(dia => diasFiltro.includes(dia));
         
         const matchBusca = state.filtro.busca === '' || 
           rotina.titulo.toLowerCase().includes(state.filtro.busca.toLowerCase()) ||
-          rotina.descricao.toLowerCase().includes(state.filtro.busca.toLowerCase())
+          rotina.descricao.toLowerCase().includes(state.filtro.busca.toLowerCase());
         
-        return matchDias && matchBusca
-      })
+        return matchDias && matchBusca;
+      });
     },
     
     // Rotinas para hoje

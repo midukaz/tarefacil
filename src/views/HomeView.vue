@@ -30,29 +30,30 @@
                 {{ item.mensagem }}
               </p>
               
-              <div class="mt-2 flex gap-2">
-                <button 
-                  v-if="item.tipo === 'tarefa'"
-                  @click="marcarTarefaComoArquivada(item.item.id)" 
-                  class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
-                >
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                  </svg>
-                  Arquivar
-                </button>
-                
-                <button 
-                  v-if="item.tipo === 'evento'"
-                  @click="marcarEventoComoArquivado(item.item.id)" 
-                  class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
-                >
-                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                  </svg>
-                  Arquivar
-                </button>
-              </div>
+            </div>
+            <div class="mt-2 flex gap-2">
+              <button 
+                v-if="item.tipo === 'tarefa'"
+                @click="marcarTarefaComoArquivada(item.item.id)" 
+                :class="getAlertTextClass(item.type)"
+                class="text-xs px-2 py-1 rounded flex items-center"
+              >
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                Arquivar
+              </button>
+              
+              <button 
+                v-if="item.tipo === 'evento'"
+                @click="marcarEventoComoArquivado(item.item.id)" 
+                class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
+              >
+                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                </svg>
+                Arquivar
+              </button>
             </div>
           </li>
         </ul>
@@ -339,6 +340,99 @@
       </div>
     </div>
   </div>
+  
+  <!-- Modal para finalizar rotina do dia -->
+  <transition 
+    enter-active-class="transition duration-200 ease-out" 
+    enter-from-class="opacity-0" 
+    enter-to-class="opacity-100" 
+    leave-active-class="transition duration-150 ease-in" 
+    leave-from-class="opacity-100" 
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="mostrarModalFinalizarRotina"
+      class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
+      @click.self="fecharModalFinalizarRotina"
+    >
+      <div 
+        class="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all p-6"
+        :class="{ 'opacity-100 scale-100': mostrarModalFinalizarRotina, 'opacity-0 scale-95': !mostrarModalFinalizarRotina }"
+      >
+        <h2 class="text-lg font-semibold text-gray-900 mb-2">Finalizar Rotina do Dia</h2>
+        <p class="text-gray-600 mb-4">
+          Esta ação vai marcar como concluídos e/ou arquivar os seguintes itens:
+        </p>
+        
+        <div class="mb-4 space-y-4">
+          <div v-if="tarefasStore.tarefasHoje.length > 0" class="bg-indigo-50 p-3 rounded-md">
+            <div class="flex items-center mb-2">
+              <input 
+                type="checkbox" 
+                id="marcarTarefas" 
+                v-model="finalizarTarefas"
+                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+              />
+              <label for="marcarTarefas" class="ml-2 text-sm font-medium text-gray-700">
+                {{ tarefasStore.tarefasHoje.length }} tarefas de hoje
+              </label>
+            </div>
+            <p class="text-xs text-gray-500 ml-6">As tarefas serão marcadas como concluídas</p>
+          </div>
+          
+          <div v-if="eventosStore.eventosHoje.length > 0" class="bg-rose-50 p-3 rounded-md">
+            <div class="flex items-center mb-2">
+              <input 
+                type="checkbox" 
+                id="marcarEventos" 
+                v-model="finalizarEventos"
+                class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
+              />
+              <label for="marcarEventos" class="ml-2 text-sm font-medium text-gray-700">
+                {{ eventosStore.eventosHoje.length }} eventos de hoje
+              </label>
+            </div>
+            <p class="text-xs text-gray-500 ml-6">Os eventos serão marcados como concluídos</p>
+          </div>
+          
+          <div v-if="tarefasStore.tarefasAtrasadas.length > 0" class="bg-amber-50 p-3 rounded-md">
+            <div class="flex items-center mb-2">
+              <input 
+                type="checkbox" 
+                id="marcarAtrasadas" 
+                v-model="finalizarAtrasadas"
+                class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
+              />
+              <label for="marcarAtrasadas" class="ml-2 text-sm font-medium text-gray-700">
+                {{ tarefasStore.tarefasAtrasadas.length }} tarefas atrasadas
+              </label>
+            </div>
+            <p class="text-xs text-gray-500 ml-6">As tarefas atrasadas serão arquivadas</p>
+          </div>
+        </div>
+        
+        <div v-if="!tarefasStore.tarefasHoje.length && !eventosStore.eventosHoje.length && !tarefasStore.tarefasAtrasadas.length" class="mb-4 text-center py-4">
+          <p class="text-gray-500">Não há itens para finalizar hoje!</p>
+        </div>
+        
+        <div class="flex justify-end space-x-3">
+          <button 
+            @click="fecharModalFinalizarRotina" 
+            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+          >
+            Cancelar
+          </button>
+          <button 
+            @click="finalizarRotinaDoDia"
+            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
+            :disabled="!finalizarTarefas && !finalizarEventos && !finalizarAtrasadas"
+          >
+            Finalizar
+          </button>
+        </div>
+      </div>
+    </div>
+  </transition>
 </template>
 
 <script setup lang="ts">
@@ -531,5 +625,47 @@ function marcarEventoComoArquivado(id: string) {
   eventosStore.marcarComoArquivado(id, true);
   // Atualiza a lista de alertas removendo o item arquivado
   showAlert.value = alertItems.value.length > 0;
+}
+
+// Estado para o modal de finalizar rotina
+const mostrarModalFinalizarRotina = ref(false)
+const finalizarTarefas = ref(true)
+const finalizarEventos = ref(true)
+const finalizarAtrasadas = ref(true)
+
+function fecharModalFinalizarRotina() {
+  mostrarModalFinalizarRotina.value = false
+}
+
+function finalizarRotinaDoDia() {
+  // Marcar tarefas de hoje como concluídas
+  if (finalizarTarefas.value) {
+    tarefasStore.tarefasHoje.forEach(tarefa => {
+      tarefasStore.atualizarTarefa(tarefa.id, { 
+        status: 'concluida', 
+        dataConclusao: new Date() 
+      })
+    })
+  }
+  
+  // Marcar eventos de hoje como concluídos
+  if (finalizarEventos.value) {
+    eventosStore.eventosHoje.forEach(evento => {
+      eventosStore.marcarComoConcluido(evento.id, true)
+    })
+  }
+  
+  // Arquivar tarefas atrasadas
+  if (finalizarAtrasadas.value) {
+    tarefasStore.tarefasAtrasadas.forEach(tarefa => {
+      tarefasStore.marcarComoArquivada(tarefa.id, true)
+    })
+  }
+  
+  // Fechar o modal e mostrar mensagem de sucesso
+  fecharModalFinalizarRotina()
+  
+  // Opcional: poderia adicionar um toast ou notificação aqui
+  alert('Rotina do dia finalizada com sucesso!')
 }
 </script> 

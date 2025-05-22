@@ -72,6 +72,7 @@
         @editar="editarRotina"
         @excluir="excluirRotina"
         @atualizar-tarefa="atualizarTarefaRotina"
+        @finalizar-rotina="finalizarRotina"
       />
       
       <div v-if="store.rotinasFiltradas.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
@@ -182,6 +183,22 @@ function salvarRotina(rotina: Omit<Rotina, 'id' | 'dataCriacao'>) {
 
 function atualizarTarefaRotina(rotinaId: string, tarefaId: string, concluida: boolean) {
   store.atualizarTarefaRotina(rotinaId, tarefaId, concluida)
+}
+
+function finalizarRotina(rotinaId: string) {
+  // Obter a rotina selecionada
+  const rotina = store.rotinas.find(r => r.id === rotinaId)
+  if (!rotina) return
+  
+  // Marcar todas as tarefas como concluídas
+  rotina.tarefas.forEach(tarefa => {
+    store.atualizarTarefaRotina(rotinaId, tarefa.id, true)
+  })
+  
+  // Registrar a execução
+  store.registrarExecucao(rotinaId)
+  
+  alert(`Rotina "${rotina.titulo}" finalizada com sucesso!`)
 }
 
 function fecharFormulario() {

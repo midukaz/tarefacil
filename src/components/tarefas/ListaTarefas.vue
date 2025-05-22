@@ -112,11 +112,13 @@
                 />
                 <span
                   :class="{
-                    'text-gray-500 line-through': subtarefa.concluida
+                    'text-gray-500 line-through': subtarefa.concluida,
+                    'text-gray-700': !subtarefa.concluida
                   }"
                   class="text-sm"
                 >
                   {{ subtarefa.titulo }}
+                  {{ subtarefa }}
                 </span>
               </li>
             </ul>
