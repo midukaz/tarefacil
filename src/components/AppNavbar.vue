@@ -6,7 +6,7 @@
         <div class="flex-shrink-0 flex items-center">
           <router-link to="/" class="text-xl font-medium text-indigo-600 flex items-center gap-2">
             <img src="/favicon.svg" alt="Logo" class="w-8 h-8">
-            <span class="text-zinc-600 font-bold">TarefaFácil</span>
+            <span class="text-zinc-600 font-bold">TareFácil</span>
           </router-link>
         </div>
         
@@ -17,9 +17,12 @@
               v-for="item in menuItems" 
               :key="item.path" 
               :to="item.path"
-              class="px-3 py-2 text-sm font-medium rounded-md transition-colors"
+              class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
               :class="[$route.path === item.path ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50']"
             >
+              <span class="mr-1.5">
+                <component :is="item.icon" class="w-5 h-5" aria-hidden="true" />
+              </span>
               {{ item.name }}
             </router-link>
           </div>
@@ -64,10 +67,13 @@
           v-for="item in menuItems" 
           :key="item.path" 
           :to="item.path"
-          class="block px-3 py-2 text-base font-medium rounded-md transition-colors"
+          class="block px-3 py-2 text-base font-medium rounded-md transition-colors flex items-center"
           :class="[$route.path === item.path ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50']"
           @click="mobileMenuOpen = false"
         >
+          <span class="mr-2">
+            <component :is="item.icon" class="w-5 h-5" aria-hidden="true" />
+          </span>
           {{ item.name }}
         </router-link>
       </div>
@@ -76,16 +82,93 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, defineComponent, h } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 
+// Definição dos ícones
+const HomeIcon = defineComponent({
+  name: 'HomeIcon',
+  render() {
+    return h('svg', { 
+      xmlns: 'http://www.w3.org/2000/svg', 
+      fill: 'none', 
+      viewBox: '0 0 24 24', 
+      stroke: 'currentColor' 
+    }, [
+      h('path', { 
+        'stroke-linecap': 'round', 
+        'stroke-linejoin': 'round', 
+        'stroke-width': '2', 
+        d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' 
+      })
+    ])
+  }
+})
+
+const TaskIcon = defineComponent({
+  name: 'TaskIcon',
+  render() {
+    return h('svg', { 
+      xmlns: 'http://www.w3.org/2000/svg', 
+      fill: 'none', 
+      viewBox: '0 0 24 24', 
+      stroke: 'currentColor' 
+    }, [
+      h('path', { 
+        'stroke-linecap': 'round', 
+        'stroke-linejoin': 'round', 
+        'stroke-width': '2', 
+        d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' 
+      })
+    ])
+  }
+})
+
+const CalendarIcon = defineComponent({
+  name: 'CalendarIcon',
+  render() {
+    return h('svg', { 
+      xmlns: 'http://www.w3.org/2000/svg', 
+      fill: 'none', 
+      viewBox: '0 0 24 24', 
+      stroke: 'currentColor' 
+    }, [
+      h('path', { 
+        'stroke-linecap': 'round', 
+        'stroke-linejoin': 'round', 
+        'stroke-width': '2', 
+        d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' 
+      })
+    ])
+  }
+})
+
+const ClockIcon = defineComponent({
+  name: 'ClockIcon',
+  render() {
+    return h('svg', { 
+      xmlns: 'http://www.w3.org/2000/svg', 
+      fill: 'none', 
+      viewBox: '0 0 24 24', 
+      stroke: 'currentColor' 
+    }, [
+      h('path', { 
+        'stroke-linecap': 'round', 
+        'stroke-linejoin': 'round', 
+        'stroke-width': '2', 
+        d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' 
+      })
+    ])
+  }
+})
+
 const menuItems = [
-  { name: 'Início', path: '/' },
-  { name: 'Tarefas', path: '/tarefas' },
-  { name: 'Eventos', path: '/eventos' },
-  { name: 'Rotinas', path: '/rotinas' }
+  { name: 'Início', path: '/', icon: HomeIcon },
+  { name: 'Tarefas', path: '/tarefas', icon: TaskIcon },
+  { name: 'Eventos', path: '/eventos', icon: CalendarIcon },
+  { name: 'Rotinas', path: '/rotinas', icon: ClockIcon }
 ]
 </script> 

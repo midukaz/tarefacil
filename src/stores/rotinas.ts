@@ -20,6 +20,20 @@ export interface TarefaRotina {
 
 export type DiaSemana = 'segunda' | 'terca' | 'quarta' | 'quinta' | 'sexta' | 'sabado' | 'domingo'
 
+// Chave para armazenar os dados no localStorage
+const STORAGE_KEY = 'tarefacil-rotinas'
+
+// Mapeamento dos dias da semana para números (0 = domingo, 1 = segunda, etc.)
+const DIAS_SEMANA_MAP: Record<DiaSemana, number> = {
+  domingo: 0,
+  segunda: 1,
+  terca: 2,
+  quarta: 3,
+  quinta: 4,
+  sexta: 5,
+  sabado: 6
+}
+
 export const useRotinasStore = defineStore('rotinas', {
   state: () => ({
     rotinas: [] as Rotina[],
@@ -41,10 +55,60 @@ export const useRotinasStore = defineStore('rotinas', {
         
         return matchDias && matchBusca
       })
+    },
+    
+    // Rotinas para hoje
+    rotinasHoje: (state) => {
+      const hoje = new Date();
+      const diaSemanaHoje = hoje.getDay(); // 0 = Domingo, 1 = Segunda, etc.
+      
+      const diasSemanaMap: Record<number, DiaSemana> = {
+        0: 'domingo',
+        1: 'segunda',
+        2: 'terca',
+        3: 'quarta',
+        4: 'quinta',
+        5: 'sexta',
+        6: 'sabado'
+      };
+      
+      const diaHoje = diasSemanaMap[diaSemanaHoje];
+      
+      return state.rotinas.filter(rotina => 
+        rotina.ativa && rotina.diasSemana.includes(diaHoje)
+      ).sort((a, b) => a.horario.localeCompare(b.horario));
     }
   },
 
   actions: {
+    // Carregar dados do localStorage
+    carregarDados() {
+      try {
+        const dadosSalvos = localStorage.getItem(STORAGE_KEY);
+        if (dadosSalvos) {
+          const dados = JSON.parse(dadosSalvos);
+          
+          // Convertendo strings de data de volta para objetos Date
+          this.rotinas = dados.map((rotina: any) => ({
+            ...rotina,
+            dataCriacao: new Date(rotina.dataCriacao),
+            ultimaExecucao: rotina.ultimaExecucao ? new Date(rotina.ultimaExecucao) : undefined
+          }));
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do localStorage:', error);
+      }
+    },
+
+    // Salvar dados no localStorage
+    salvarDados() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.rotinas));
+      } catch (error) {
+        console.error('Erro ao salvar dados no localStorage:', error);
+      }
+    },
+
     adicionarRotina(rotina: Omit<Rotina, 'id' | 'dataCriacao'>) {
       const novaRotina: Rotina = {
         ...rotina,
@@ -52,17 +116,20 @@ export const useRotinasStore = defineStore('rotinas', {
         dataCriacao: new Date()
       }
       this.rotinas.push(novaRotina)
+      this.salvarDados()
     },
 
     atualizarRotina(id: string, atualizacoes: Partial<Rotina>) {
       const index = this.rotinas.findIndex(r => r.id === id)
       if (index !== -1) {
         this.rotinas[index] = { ...this.rotinas[index], ...atualizacoes }
+        this.salvarDados()
       }
     },
 
     removerRotina(id: string) {
       this.rotinas = this.rotinas.filter(r => r.id !== id)
+      this.salvarDados()
     },
 
     adicionarTarefaRotina(rotinaId: string, tarefa: Omit<TarefaRotina, 'id'>) {
@@ -72,6 +139,7 @@ export const useRotinasStore = defineStore('rotinas', {
           ...tarefa,
           id: crypto.randomUUID()
         })
+        this.salvarDados()
       }
     },
 
@@ -81,6 +149,7 @@ export const useRotinasStore = defineStore('rotinas', {
         const tarefa = rotina.tarefas.find(t => t.id === tarefaId)
         if (tarefa) {
           tarefa.concluida = concluida
+          this.salvarDados()
         }
       }
     },
@@ -93,6 +162,7 @@ export const useRotinasStore = defineStore('rotinas', {
       const rotina = this.rotinas.find(r => r.id === id)
       if (rotina) {
         rotina.ultimaExecucao = new Date()
+        this.salvarDados()
       }
     }
   }
