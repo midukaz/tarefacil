@@ -10,7 +10,9 @@ export interface Evento {
   categoria: string
   prioridade: 'baixa' | 'media' | 'alta'
   concluido: boolean
+  arquivado: boolean
   dataCriacao: Date
+  dataArquivamento?: Date
   lembretes: Lembrete[]
 }
 
@@ -32,7 +34,8 @@ export const useEventosStore = defineStore('eventos', {
       dataFim: undefined as Date | undefined,
       categorias: [] as string[],
       prioridades: [] as string[],
-      concluidos: false
+      concluidos: false,
+      mostrarArquivados: false
     }
   }),
 
@@ -65,7 +68,11 @@ export const useEventosStore = defineStore('eventos', {
         const concluidoMatch = !state.filtro.concluidos || 
           evento.concluido === state.filtro.concluidos;
         
-        return textoMatch && inicioMatch && fimMatch && categoriaMatch && prioridadeMatch && concluidoMatch;
+        // Filtro por arquivados
+        const arquivadoMatch = state.filtro.mostrarArquivados ? true : !evento.arquivado;
+        
+        return textoMatch && inicioMatch && fimMatch && categoriaMatch && prioridadeMatch && 
+               concluidoMatch && arquivadoMatch;
       });
     },
     
@@ -96,7 +103,7 @@ export const useEventosStore = defineStore('eventos', {
       
       return state.eventos.filter(evento => {
         const dataInicio = new Date(evento.dataInicio);
-        return dataInicio >= hoje && dataInicio < amanha && !evento.concluido;
+        return dataInicio >= hoje && dataInicio < amanha && !evento.concluido && !evento.arquivado;
       }).sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
     },
     
@@ -111,8 +118,13 @@ export const useEventosStore = defineStore('eventos', {
       
       return state.eventos.filter(evento => {
         const dataInicio = new Date(evento.dataInicio);
-        return dataInicio >= amanha && dataInicio < limite && !evento.concluido;
+        return dataInicio >= amanha && dataInicio < limite && !evento.concluido && !evento.arquivado;
       }).sort((a, b) => new Date(a.dataInicio).getTime() - new Date(b.dataInicio).getTime());
+    },
+    
+    // Eventos arquivados
+    eventosArquivados: (state) => {
+      return state.eventos.filter(evento => evento.arquivado);
     }
   },
 
@@ -127,10 +139,13 @@ export const useEventosStore = defineStore('eventos', {
           // Convertendo strings de data de volta para objetos Date
           this.eventos = dados.map((evento: any) => ({
             ...evento,
-            dataCriacao: new Date(evento.dataCriacao),
             dataInicio: new Date(evento.dataInicio),
             dataFim: new Date(evento.dataFim),
-            lembretes: evento.lembretes.map((lembrete: any) => ({
+            dataCriacao: new Date(evento.dataCriacao),
+            dataArquivamento: evento.dataArquivamento ? new Date(evento.dataArquivamento) : undefined,
+            // Garantir que todos os eventos tenham a propriedade arquivado
+            arquivado: evento.arquivado || false,
+            lembretes: (evento.lembretes || []).map((lembrete: any) => ({
               ...lembrete,
               data: new Date(lembrete.data)
             }))
@@ -203,6 +218,19 @@ export const useEventosStore = defineStore('eventos', {
 
     definirFiltro(filtro: Partial<typeof this.filtro>) {
       this.filtro = { ...this.filtro, ...filtro };
+    },
+    
+    marcarComoArquivado(id: string, arquivado: boolean) {
+      const evento = this.eventos.find(e => e.id === id);
+      if (evento) {
+        evento.arquivado = arquivado;
+        if (arquivado) {
+          evento.dataArquivamento = new Date();
+        } else {
+          evento.dataArquivamento = undefined;
+        }
+        this.salvarDados();
+      }
     }
   }
 }); 

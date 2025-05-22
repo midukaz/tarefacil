@@ -6,8 +6,36 @@
       <p class="text-gray-600">Organize seus compromissos e eventos importantes</p>
     </div>
 
-    <!-- Barra de filtros -->
-    <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
+    <!-- Tabs para alternar entre eventos normais e arquivados -->
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button
+          @click="visualizacao = 'ativos'"
+          class="py-2 px-1 border-b-2 text-sm font-medium"
+          :class="visualizacao === 'ativos' 
+            ? 'border-amber-500 text-amber-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        >
+          Eventos Ativos
+        </button>
+        <button
+          @click="visualizacao = 'arquivados'"
+          class="py-2 px-1 border-b-2 text-sm font-medium"
+          :class="visualizacao === 'arquivados' 
+            ? 'border-amber-500 text-amber-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        >
+          Eventos Arquivados
+          <span v-if="eventosStore.eventosArquivados.length > 0" 
+            class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-amber-500 rounded-full">
+            {{ eventosStore.eventosArquivados.length }}
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Barra de filtros (apenas para eventos ativos) -->
+    <div class="bg-white rounded-lg shadow-sm mb-6 p-4" v-if="visualizacao === 'ativos'">
       <div class="flex flex-col gap-4">
         <!-- Busca -->
         <div class="relative">
@@ -17,7 +45,7 @@
             </svg>
           </div>
           <input
-            v-model="store.filtro.busca"
+            v-model="eventosStore.filtro.busca"
             type="search"
             placeholder="Buscar eventos..."
             class="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none"
@@ -36,7 +64,7 @@
               class="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-amber-300 focus:border-amber-300 outline-none"
             >
               <option value="">Todas as categorias</option>
-              <option v-for="categoria in store.categoriasDisponiveis" :key="categoria" :value="categoria">
+              <option v-for="categoria in eventosStore.categoriasDisponiveis" :key="categoria" :value="categoria">
                 {{ categoria }}
               </option>
             </select>
@@ -65,7 +93,7 @@
               <input
                 type="checkbox"
                 id="mostrarConcluidos"
-                v-model="store.filtro.concluidos"
+                v-model="eventosStore.filtro.concluidos"
                 class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
               />
               <label for="mostrarConcluidos" class="text-sm text-gray-700">
@@ -127,19 +155,42 @@
 
     <!-- Lista de eventos -->
     <div>
-      <ListaEventos
-        :eventos="store.eventosFiltrados"
-        @editar="editarEvento"
-        @excluir="excluirEvento"
-        @concluir="marcarComoConcluido"
-      />
-      
-      <div v-if="store.eventosFiltrados.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
-        <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-        <p class="text-gray-500 mb-1">Nenhum evento encontrado</p>
-        <p class="text-sm text-gray-400">Crie um novo evento ou ajuste os filtros</p>
+      <!-- Eventos ativos -->
+      <div v-if="visualizacao === 'ativos'">
+        <ListaEventos
+          :eventos="eventosStore.eventosFiltrados"
+          @editar="editarEvento"
+          @excluir="excluirEvento"
+          @concluir="marcarComoConcluido"
+          @arquivar="marcarEventoComoArquivado"
+        />
+        
+        <div v-if="eventosStore.eventosFiltrados.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
+          <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          <p class="text-gray-500 mb-1">Nenhum evento encontrado</p>
+          <p class="text-sm text-gray-400">Crie um novo evento ou ajuste os filtros</p>
+        </div>
+      </div>
+
+      <!-- Eventos arquivados -->
+      <div v-if="visualizacao === 'arquivados'">
+        <ListaEventos
+          :eventos="eventosStore.eventosArquivados"
+          @editar="editarEvento"
+          @excluir="excluirEvento"
+          @concluir="marcarComoConcluido"
+          @arquivar="desarquivarEvento"
+        />
+        
+        <div v-if="eventosStore.eventosArquivados.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
+          <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <p class="text-gray-500 mb-1">Nenhum evento arquivado</p>
+          <p class="text-sm text-gray-400">Os eventos arquivados aparecerão aqui</p>
+        </div>
       </div>
     </div>
 
@@ -173,7 +224,7 @@
         >
           <EventoForm
             :evento="eventoSelecionado"
-            :categorias="store.categoriasDisponiveis"
+            :categorias="eventosStore.categoriasDisponiveis"
             @salvar="salvarEvento"
             @cancelar="fecharFormulario"
           />
@@ -191,9 +242,10 @@ import ListaEventos from '../components/eventos/ListaEventos.vue'
 import EventoForm from '../components/eventos/EventoForm.vue'
 import { parseISO } from 'date-fns'
 
-const store = useEventosStore()
+const eventosStore = useEventosStore()
 const mostrarFormulario = ref(false)
 const eventoSelecionado = ref<Evento | undefined>()
+const visualizacao = ref<'ativos' | 'arquivados'>('ativos')
 
 // Estado local para os filtros
 const categoriaSelecionada = ref('')
@@ -208,36 +260,48 @@ function editarEvento(evento: Evento) {
 
 function excluirEvento(id: string) {
   if (confirm('Tem certeza que deseja excluir este evento?')) {
-    store.removerEvento(id)
+    eventosStore.removerEvento(id)
   }
 }
 
 function salvarEvento(evento: Omit<Evento, 'id' | 'dataCriacao'>) {
   if (eventoSelecionado.value) {
-    store.atualizarEvento(eventoSelecionado.value.id, evento)
+    eventosStore.atualizarEvento(eventoSelecionado.value.id, evento)
   } else {
-    store.adicionarEvento(evento)
+    eventosStore.adicionarEvento(evento)
   }
   fecharFormulario()
 }
 
 function marcarComoConcluido(id: string, concluido: boolean) {
-  store.marcarComoConcluido(id, concluido)
+  eventosStore.marcarComoConcluido(id, concluido)
+}
+
+function marcarEventoComoArquivado(id: string) {
+  if (confirm('Deseja arquivar este evento?')) {
+    eventosStore.marcarComoArquivado(id, true)
+  }
+}
+
+function desarquivarEvento(id: string) {
+  if (confirm('Deseja desarquivar este evento?')) {
+    eventosStore.marcarComoArquivado(id, false)
+  }
 }
 
 function handleCategoriaChange() {
   if (categoriaSelecionada.value) {
-    store.definirFiltro({ categorias: [categoriaSelecionada.value] })
+    eventosStore.definirFiltro({ categorias: [categoriaSelecionada.value] })
   } else {
-    store.definirFiltro({ categorias: [] })
+    eventosStore.definirFiltro({ categorias: [] })
   }
 }
 
 function handlePrioridadeChange() {
   if (prioridadeSelecionada.value) {
-    store.definirFiltro({ prioridades: [prioridadeSelecionada.value] })
+    eventosStore.definirFiltro({ prioridades: [prioridadeSelecionada.value] })
   } else {
-    store.definirFiltro({ prioridades: [] })
+    eventosStore.definirFiltro({ prioridades: [] })
   }
 }
 
@@ -252,7 +316,7 @@ function aplicarFiltroData() {
     filtro.dataFim = parseISO(dataFimFiltro.value)
   }
   
-  store.definirFiltro(filtro)
+  eventosStore.definirFiltro(filtro)
 }
 
 function limparFiltros() {
@@ -261,13 +325,14 @@ function limparFiltros() {
   dataInicioFiltro.value = ''
   dataFimFiltro.value = ''
   
-  store.definirFiltro({
+  eventosStore.definirFiltro({
     busca: '',
     dataInicio: undefined,
     dataFim: undefined,
     categorias: [],
     prioridades: [],
-    concluidos: false
+    concluidos: false,
+    mostrarArquivados: false
   })
 }
 
