@@ -55,6 +55,7 @@
             <option value="pendente">Pendente</option>
             <option value="em_andamento">Em andamento</option>
             <option value="concluida">Concluída</option>
+            <option value="arquivada">Arquivada</option>
           </select>
         </div>
 
@@ -129,13 +130,31 @@
       <div>
         <div class="flex justify-between items-center mb-1">
           <label class="block text-sm font-medium text-gray-700">Subtarefas</label>
-          <button 
-            type="button" 
-            @click="adicionarSubtarefa" 
-            class="text-xs text-indigo-500 hover:text-indigo-600"
-          >
-            + Adicionar
-          </button>
+          <div class="flex gap-2">
+            <button 
+              type="button" 
+              @click="marcarTodasSubtarefas(true)" 
+              class="text-xs text-green-500 hover:text-green-600"
+              v-if="form.subtarefas.length > 0"
+            >
+              Marcar todas
+            </button>
+            <button 
+              type="button" 
+              @click="marcarTodasSubtarefas(false)" 
+              class="text-xs text-gray-500 hover:text-gray-600 ml-2"
+              v-if="form.subtarefas.length > 0"
+            >
+              Desmarcar todas
+            </button>
+            <button 
+              type="button" 
+              @click="adicionarSubtarefa" 
+              class="text-xs text-indigo-500 hover:text-indigo-600 ml-2"
+            >
+              + Adicionar
+            </button>
+          </div>
         </div>
         
         <div v-if="form.subtarefas.length === 0" class="text-sm text-gray-400 text-center py-2 border border-dashed border-gray-200 rounded-md">
@@ -143,7 +162,12 @@
         </div>
         
         <ul v-else class="space-y-2">
-          <li v-for="(subtarefa, index) in form.subtarefas" :key="index" class="flex items-center gap-2">
+          <li v-for="(subtarefa, index) in form.subtarefas" :key="subtarefa.id || index" class="flex items-center gap-2">
+            <input
+              type="checkbox"
+              v-model="subtarefa.concluida"
+              class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+            />
             <input
               v-model="subtarefa.titulo"
               class="flex-1 px-3 py-1.5 text-sm bg-white border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
@@ -198,11 +222,11 @@ const emit = defineEmits<{
 type FormType = {
   titulo: string;
   descricao: string;
-  status: 'pendente' | 'em_andamento' | 'concluida';
+  status: 'pendente' | 'em_andamento' | 'concluida' | 'arquivada';
   prioridade: 'baixa' | 'media' | 'alta';
   dataVencimento: Date | undefined;
   tags: string[];
-  subtarefas: { titulo: string; concluida: boolean }[];
+  subtarefas: { id: string; titulo: string; concluida: boolean }[];
 }
 
 const form = ref<FormType>({
@@ -239,6 +263,7 @@ onMounted(() => {
       dataVencimento: props.tarefa.dataVencimento,
       tags: [...props.tarefa.tags],
       subtarefas: props.tarefa.subtarefas.map(s => ({
+        id: s.id,
         titulo: s.titulo,
         concluida: s.concluida
       }))
@@ -258,11 +283,21 @@ function removerTag(tag: string) {
 }
 
 function adicionarSubtarefa() {
-  form.value.subtarefas.push({ titulo: '', concluida: false })
+  form.value.subtarefas.push({ 
+    id: crypto.randomUUID(),
+    titulo: '', 
+    concluida: false 
+  })
 }
 
 function removerSubtarefa(index: number) {
   form.value.subtarefas.splice(index, 1)
+}
+
+function marcarTodasSubtarefas(concluida: boolean) {
+  form.value.subtarefas.forEach(subtarefa => {
+    subtarefa.concluida = concluida;
+  });
 }
 
 function salvar() {

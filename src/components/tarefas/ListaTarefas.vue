@@ -118,7 +118,6 @@
                   class="text-sm"
                 >
                   {{ subtarefa.titulo }}
-                  {{ subtarefa }}
                 </span>
               </li>
             </ul>
@@ -166,6 +165,23 @@ const prioridadeLabel: Record<string, string> = {
 
 function handleSubtarefaChange(tarefaId: string, subtarefaId: string, event: Event) {
   const target = event.target as HTMLInputElement;
+  
+  if (!subtarefaId) {
+    console.error('[ListaTarefas] ERRO: ID da subtarefa está ausente!');
+    console.log('[ListaTarefas] Tarefa ID:', tarefaId);
+    console.log('[ListaTarefas] Valor do checkbox:', target.checked);
+    
+    // Encontrar a tarefa e mostrar suas subtarefas para debug
+    const tarefa = props.tarefas.find(t => t.id === tarefaId);
+    if (tarefa) {
+      console.log('[ListaTarefas] Subtarefas da tarefa:', 
+        tarefa.subtarefas.map(s => ({id: s.id || 'SEM_ID', titulo: s.titulo, concluida: s.concluida}))
+      );
+    }
+    return;
+  }
+  
+  console.log(`[ListaTarefas] Atualizando subtarefa - Tarefa ID: ${tarefaId}, Subtarefa ID: ${subtarefaId}, Valor: ${target.checked}`);
   emit('atualizar-subtarefa', tarefaId, subtarefaId, target.checked);
 }
 </script> 

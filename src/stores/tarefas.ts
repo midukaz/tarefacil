@@ -120,13 +120,29 @@ export const useTarefasStore = defineStore('tarefas', {
           const dados = JSON.parse(dadosSalvos)
           
           // Convertendo strings de data de volta para objetos Date
-          this.tarefas = dados.map((tarefa: any) => ({
-            ...tarefa,
-            dataCriacao: new Date(tarefa.dataCriacao),
-            dataConclusao: tarefa.dataConclusao ? new Date(tarefa.dataConclusao) : undefined,
-            dataArquivamento: tarefa.dataArquivamento ? new Date(tarefa.dataArquivamento) : undefined,
-            dataVencimento: tarefa.dataVencimento ? new Date(tarefa.dataVencimento) : undefined
-          }))
+          // e garantindo que todas as subtarefas tenham IDs
+          this.tarefas = dados.map((tarefa: any) => {
+            // Verificar e corrigir subtarefas sem ID
+            const subtarefasCorrigidas = tarefa.subtarefas.map((sub: any) => {
+              if (!sub.id) {
+                console.log('[Store] Corrigindo subtarefa sem ID:', sub.titulo);
+                return {
+                  ...sub,
+                  id: crypto.randomUUID() // Gera um novo ID para subtarefas sem ID
+                };
+              }
+              return sub;
+            });
+            
+            return {
+              ...tarefa,
+              subtarefas: subtarefasCorrigidas,
+              dataCriacao: new Date(tarefa.dataCriacao),
+              dataConclusao: tarefa.dataConclusao ? new Date(tarefa.dataConclusao) : undefined,
+              dataArquivamento: tarefa.dataArquivamento ? new Date(tarefa.dataArquivamento) : undefined,
+              dataVencimento: tarefa.dataVencimento ? new Date(tarefa.dataVencimento) : undefined
+            };
+          });
         }
       } catch (error) {
         console.error('Erro ao carregar dados do localStorage:', error)
@@ -155,6 +171,36 @@ export const useTarefasStore = defineStore('tarefas', {
     atualizarTarefa(id: string, atualizacoes: Partial<Tarefa>) {
       const index = this.tarefas.findIndex(t => t.id === id)
       if (index !== -1) {
+        // Se há subtarefas nas atualizações, garantir que todas tenham IDs
+        if (atualizacoes.subtarefas) {
+          console.log('[Store] Verificando IDs das subtarefas na atualização...');
+          
+          // Preservar o mapeamento ID -> subtarefa das subtarefas existentes
+          const subtarefasExistentes = new Map();
+          this.tarefas[index].subtarefas.forEach(s => {
+            if (s.id) {
+              subtarefasExistentes.set(s.id, s);
+            }
+          });
+          
+          // Garantir que todas as subtarefas nas atualizações tenham IDs
+          atualizacoes.subtarefas = atualizacoes.subtarefas.map(s => {
+            // Se não tem ID, gerar um novo
+            if (!s.id) {
+              console.log('[Store] Gerando novo ID para subtarefa:', s.titulo);
+              return {
+                ...s,
+                id: crypto.randomUUID()
+              };
+            }
+            return s;
+          });
+          
+          console.log('[Store] Subtarefas após garantir IDs:', 
+            atualizacoes.subtarefas.map(s => ({id: s.id, titulo: s.titulo}))
+          );
+        }
+        
         this.tarefas[index] = { ...this.tarefas[index], ...atualizacoes }
         this.salvarDados()
       }
@@ -177,13 +223,33 @@ export const useTarefasStore = defineStore('tarefas', {
     },
 
     atualizarSubtarefa(tarefaId: string, subtarefaId: string, concluida: boolean) {
+      console.log(`[Store] Atualizando subtarefa - Tarefa ID: ${tarefaId}`);
+      console.log(`[Store] Subtarefa ID completo: ${subtarefaId}`);
+      console.log(`[Store] Valor: ${concluida}`);
+      
       const tarefa = this.tarefas.find(t => t.id === tarefaId)
       if (tarefa) {
+        console.log(`[Store] Subtarefas antes da atualização:`, 
+          tarefa.subtarefas.map(s => ({id: s.id, titulo: s.titulo, concluida: s.concluida}))
+        );
+        
         const subtarefa = tarefa.subtarefas.find(s => s.id === subtarefaId)
         if (subtarefa) {
+          console.log(`[Store] Atualizando subtarefa específica: "${subtarefa.titulo}", ID: ${subtarefa.id}`);
           subtarefa.concluida = concluida
+          
+          // Verificação após atualização
+          console.log(`[Store] Subtarefas após atualização:`, 
+            tarefa.subtarefas.map(s => ({id: s.id, titulo: s.titulo, concluida: s.concluida}))
+          );
+          
           this.salvarDados()
+        } else {
+          console.error(`[Store] Subtarefa com ID ${subtarefaId} não encontrada`);
+          console.log(`[Store] IDs de subtarefas disponíveis:`, tarefa.subtarefas.map(s => s.id));
         }
+      } else {
+        console.error(`[Store] Tarefa com ID ${tarefaId} não encontrada`);
       }
     },
 

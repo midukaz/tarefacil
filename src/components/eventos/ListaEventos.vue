@@ -16,7 +16,7 @@
                 :class="evento.concluido ? 'bg-gray-400' : getPrioridadeColor(evento.prioridade)"
               ></div>
               <div>
-                <h3 class="text-lg font-medium" :class="evento.concluido ? 'text-gray-500' : 'text-gray-900">{{ evento.titulo }}</h3>
+                <h3 class="text-lg font-medium" :class="evento.concluido ? 'text-gray-500' : 'text-gray-900'">{{ evento.titulo }}</h3>
                 <p class="text-sm mt-1" :class="evento.concluido ? 'text-gray-400' : 'text-gray-500'">{{ evento.descricao }}</p>
               </div>
             </div>
@@ -179,6 +179,7 @@ const emit = defineEmits<{
   (e: 'excluir', id: string): void
   (e: 'concluir', id: string, concluido: boolean): void
   (e: 'arquivar', id: string): void
+  (e: 'desarquivar', id: string): void
 }>()
 
 function formatarData(data: Date): string {
