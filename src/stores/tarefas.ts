@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia'
+import { isToday, isPast, isFuture, addDays, isWithinInterval } from 'date-fns'
 
 export interface Tarefa {
   id: string
@@ -8,6 +9,7 @@ export interface Tarefa {
   prioridade: 'baixa' | 'media' | 'alta'
   dataCriacao: Date
   dataConclusao?: Date
+  dataVencimento?: Date
   subtarefas: Subtarefa[]
   tags: string[]
 }
@@ -42,6 +44,54 @@ export const useTarefasStore = defineStore('tarefas', {
         
         return matchStatus && matchPrioridade && matchBusca
       })
+    },
+
+    // Tarefas pendentes (não concluídas)
+    tarefasPendentes: (state) => {
+      return state.tarefas.filter(tarefa => 
+        tarefa.status !== 'concluida'
+      ).sort((a, b) => {
+        // Ordenar por prioridade (alta -> média -> baixa)
+        const prioridadeOrdem: Record<string, number> = { 'alta': 0, 'media': 1, 'baixa': 2 };
+        return prioridadeOrdem[a.prioridade] - prioridadeOrdem[b.prioridade];
+      });
+    },
+
+    // Tarefas para hoje (com data de vencimento para hoje)
+    tarefasHoje: (state) => {
+      return state.tarefas.filter(tarefa => 
+        tarefa.dataVencimento && isToday(new Date(tarefa.dataVencimento))
+      ).sort((a, b) => {
+        // Ordenar por prioridade
+        const prioridadeOrdem: Record<string, number> = { 'alta': 0, 'media': 1, 'baixa': 2 };
+        return prioridadeOrdem[a.prioridade] - prioridadeOrdem[b.prioridade];
+      });
+    },
+
+    // Tarefas atrasadas (data de vencimento no passado e não concluídas)
+    tarefasAtrasadas: (state) => {
+      return state.tarefas.filter(tarefa => 
+        tarefa.status !== 'concluida' && 
+        tarefa.dataVencimento && 
+        isPast(new Date(tarefa.dataVencimento)) &&
+        !isToday(new Date(tarefa.dataVencimento))
+      );
+    },
+
+    // Tarefas próximas (vencimento nos próximos 3 dias)
+    tarefasProximas: (state) => {
+      const hoje = new Date();
+      const limiteFuturo = addDays(hoje, 3);
+      
+      return state.tarefas.filter(tarefa => 
+        tarefa.status !== 'concluida' && 
+        tarefa.dataVencimento && 
+        isFuture(new Date(tarefa.dataVencimento)) &&
+        isWithinInterval(new Date(tarefa.dataVencimento), {
+          start: hoje,
+          end: limiteFuturo
+        })
+      );
     }
   },
 
@@ -57,7 +107,8 @@ export const useTarefasStore = defineStore('tarefas', {
           this.tarefas = dados.map((tarefa: any) => ({
             ...tarefa,
             dataCriacao: new Date(tarefa.dataCriacao),
-            dataConclusao: tarefa.dataConclusao ? new Date(tarefa.dataConclusao) : undefined
+            dataConclusao: tarefa.dataConclusao ? new Date(tarefa.dataConclusao) : undefined,
+            dataVencimento: tarefa.dataVencimento ? new Date(tarefa.dataVencimento) : undefined
           }))
         }
       } catch (error) {

@@ -72,6 +72,17 @@
         </div>
       </div>
 
+      <!-- Data de Vencimento -->
+      <div>
+        <label for="dataVencimento" class="block text-sm font-medium text-gray-700 mb-1">Data de Vencimento</label>
+        <input
+          type="date"
+          id="dataVencimento"
+          v-model="formattedDataVencimento"
+          class="w-full px-3 py-2 text-sm bg-white border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
+        />
+      </div>
+
       <!-- Tags -->
       <div>
         <label for="tags" class="block text-sm font-medium text-gray-700 mb-1">Tags</label>
@@ -172,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import type { Tarefa } from '../../stores/tarefas'
 
 const props = defineProps<{
@@ -184,16 +195,39 @@ const emit = defineEmits<{
   (e: 'cancelar'): void
 }>()
 
-const form = ref({
+type FormType = {
+  titulo: string;
+  descricao: string;
+  status: 'pendente' | 'em_andamento' | 'concluida';
+  prioridade: 'baixa' | 'media' | 'alta';
+  dataVencimento: Date | undefined;
+  tags: string[];
+  subtarefas: { titulo: string; concluida: boolean }[];
+}
+
+const form = ref<FormType>({
   titulo: '',
   descricao: '',
-  status: 'pendente' as const,
-  prioridade: 'media' as const,
-  tags: [] as string[],
-  subtarefas: [] as { titulo: string; concluida: boolean }[]
+  status: 'pendente',
+  prioridade: 'media',
+  dataVencimento: undefined,
+  tags: [],
+  subtarefas: []
 })
 
 const novaTag = ref('')
+
+// Formatação da data para o input type="date"
+const formattedDataVencimento = computed({
+  get() {
+    if (!form.value.dataVencimento) return '';
+    const date = new Date(form.value.dataVencimento);
+    return date.toISOString().split('T')[0]; // Formato YYYY-MM-DD
+  },
+  set(value: string) {
+    form.value.dataVencimento = value ? new Date(value) : undefined;
+  }
+});
 
 onMounted(() => {
   if (props.tarefa) {
@@ -202,6 +236,7 @@ onMounted(() => {
       descricao: props.tarefa.descricao,
       status: props.tarefa.status,
       prioridade: props.tarefa.prioridade,
+      dataVencimento: props.tarefa.dataVencimento,
       tags: [...props.tarefa.tags],
       subtarefas: props.tarefa.subtarefas.map(s => ({
         titulo: s.titulo,

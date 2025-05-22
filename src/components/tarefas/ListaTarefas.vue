@@ -1,50 +1,5 @@
 <template>
   <div class="space-y-4">
-    <!-- Filtros -->
-    <div class="bg-white shadow sm:rounded-lg">
-      <div class="px-4 py-5 sm:p-6">
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-          <div>
-            <label for="filtro-status" class="block text-sm font-medium text-gray-700">Status</label>
-            <select
-              id="filtro-status"
-              v-model="filtro.status"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="todos">Todos</option>
-              <option value="pendente">Pendente</option>
-              <option value="em_andamento">Em Andamento</option>
-              <option value="concluida">Concluída</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="filtro-prioridade" class="block text-sm font-medium text-gray-700">Prioridade</label>
-            <select
-              id="filtro-prioridade"
-              v-model="filtro.prioridade"
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-              <option value="todos">Todas</option>
-              <option value="baixa">Baixa</option>
-              <option value="media">Média</option>
-              <option value="alta">Alta</option>
-            </select>
-          </div>
-
-          <div>
-            <label for="busca" class="block text-sm font-medium text-gray-700">Buscar</label>
-            <input
-              type="text"
-              id="busca"
-              v-model="filtro.busca"
-              placeholder="Buscar por título ou descrição..."
-              class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
 
     <!-- Lista de Tarefas -->
     <div class="space-y-4">
