@@ -163,6 +163,16 @@
         </div>
       </div>
     </transition>
+
+    <!-- Botão de depuração (temporário) -->
+    <div class="fixed bottom-5 left-5 z-40" v-if="visualizacao === 'ativas'">
+      <button
+        @click="corrigirSubtarefasIDs"
+        class="flex items-center justify-center px-3 py-2 rounded-md bg-yellow-500 text-white text-sm shadow-lg hover:bg-yellow-600 transition-colors"
+      >
+        Corrigir IDs Subtarefas
+      </button>
+    </div>
   </div>
 </template>
 
@@ -222,5 +232,48 @@ function atualizarSubtarefa(tarefaId: string, subtarefaId: string, concluida: bo
 function fecharFormulario() {
   mostrarFormulario.value = false
   tarefaSelecionada.value = undefined
+}
+
+function corrigirSubtarefasIDs() {
+  console.log("Iniciando correção dos IDs das subtarefas...");
+  
+  // Iterar por todas as tarefas e garantir que todas as subtarefas tenham IDs
+  let tarefasAtualizadas = false;
+  
+  const tarefas = tarefasStore.tarefas.map(tarefa => {
+    // Verificar se há alguma subtarefa sem ID
+    const subtarefasCorrigidas = tarefa.subtarefas.map(subtarefa => {
+      if (!subtarefa.id) {
+        tarefasAtualizadas = true;
+        console.log(`Corrigindo subtarefa sem ID: "${subtarefa.titulo}" na tarefa "${tarefa.titulo}"`);
+        return {
+          ...subtarefa,
+          id: crypto.randomUUID()
+        };
+      }
+      return subtarefa;
+    });
+    
+    // Se houve alguma alteração nas subtarefas
+    if (subtarefasCorrigidas.some((s, idx) => s.id !== tarefa.subtarefas[idx].id)) {
+      return {
+        ...tarefa,
+        subtarefas: subtarefasCorrigidas
+      };
+    }
+    
+    return tarefa;
+  });
+  
+  if (tarefasAtualizadas) {
+    // Substituir as tarefas no store
+    tarefasStore.$patch({ tarefas });
+    tarefasStore.salvarDados();
+    console.log("Correção concluída! IDs gerados para todas as subtarefas.");
+    alert("Correção concluída! IDs gerados para todas as subtarefas.");
+  } else {
+    console.log("Nenhuma correção necessária. Todas as subtarefas já possuem IDs.");
+    alert("Nenhuma correção necessária. Todas as subtarefas já possuem IDs.");
+  }
 }
 </script> 
