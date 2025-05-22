@@ -4,8 +4,9 @@
       <div class="flex items-center justify-between h-16">
         <!-- Logo -->
         <div class="flex-shrink-0 flex items-center">
-          <router-link to="/" class="text-xl font-medium text-indigo-600">
-            TarefaFácil
+          <router-link to="/" class="text-xl font-medium text-indigo-600 flex items-center gap-2">
+            <img src="/favicon.svg" alt="Logo" class="w-8 h-8">
+            <span class="text-zinc-600 font-bold">TarefaFácil</span>
           </router-link>
         </div>
         

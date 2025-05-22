@@ -1,12 +1,7 @@
-import { defineStore } from 'pinia'
+import { createPinia } from 'pinia'
+import { localStoragePlugin } from './plugins/localStorage'
 
-export const useMainStore = defineStore('main', {
-  state: () => ({
-    tarefas: [],
-    eventos: [],
-    rotinas: []
-  }),
-  actions: {
-    // Ações serão adicionadas conforme necessário
-  }
-}) 
+const pinia = createPinia()
+pinia.use(localStoragePlugin)
+
+export default pinia 

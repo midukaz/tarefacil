@@ -29,7 +29,7 @@
           <div class="text-sm text-gray-500 self-center mr-2">Filtrar por:</div>
           <select 
             v-model="store.filtro.status" 
-            class="text-sm rounded-md border-gray-200 py-1.5 pr-8 focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
+            class="text-sm rounded-md border-gray-200  py-1.5 pr-8 focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
           >
             <option value="todos">Todos os status</option>
             <option value="pendente">Pendente</option>
@@ -49,12 +49,9 @@
 
           <button
             @click="mostrarFormulario = true"
-            class="ml-auto flex items-center gap-1.5 rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-600 transition-colors"
+            class="ml-auto flex items-center gap-1.5 rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-600 transition-colors hidden md:block "
           >
-            <svg class="w-4 h-4" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-            </svg>
-            <span>Nova tarefa</span>
+            Nova tarefa
           </button>
         </div>
       </div>
@@ -118,7 +115,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useTarefasStore } from '../stores/tarefas'
 import type { Tarefa } from '../stores/tarefas'
 import ListaTarefas from '../components/tarefas/ListaTarefas.vue'
@@ -127,6 +124,11 @@ import TarefaForm from '../components/tarefas/TarefaForm.vue'
 const store = useTarefasStore()
 const mostrarFormulario = ref(false)
 const tarefaSelecionada = ref<Tarefa | undefined>()
+
+// Carregar dados ao iniciar o componente
+onMounted(() => {
+  store.carregarDados()
+})
 
 function editarTarefa(tarefa: Tarefa) {
   tarefaSelecionada.value = tarefa

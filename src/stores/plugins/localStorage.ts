@@ -1,4 +1,4 @@
-import { PiniaPluginContext } from 'pinia'
+import type { PiniaPluginContext } from 'pinia'
 
 export function localStoragePlugin({ store }: PiniaPluginContext) {
   // Restaura estado do localStorage quando o store é inicializado
