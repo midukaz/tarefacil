@@ -18,6 +18,9 @@ export interface Subtarefa {
   concluida: boolean
 }
 
+// Chave para armazenar os dados no localStorage
+const STORAGE_KEY = 'tarefacil-tarefas'
+
 export const useTarefasStore = defineStore('tarefas', {
   state: () => ({
     tarefas: [] as Tarefa[],
@@ -43,6 +46,34 @@ export const useTarefasStore = defineStore('tarefas', {
   },
 
   actions: {
+    // Carregar dados do localStorage
+    carregarDados() {
+      try {
+        const dadosSalvos = localStorage.getItem(STORAGE_KEY)
+        if (dadosSalvos) {
+          const dados = JSON.parse(dadosSalvos)
+          
+          // Convertendo strings de data de volta para objetos Date
+          this.tarefas = dados.map((tarefa: any) => ({
+            ...tarefa,
+            dataCriacao: new Date(tarefa.dataCriacao),
+            dataConclusao: tarefa.dataConclusao ? new Date(tarefa.dataConclusao) : undefined
+          }))
+        }
+      } catch (error) {
+        console.error('Erro ao carregar dados do localStorage:', error)
+      }
+    },
+
+    // Salvar dados no localStorage
+    salvarDados() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(this.tarefas))
+      } catch (error) {
+        console.error('Erro ao salvar dados no localStorage:', error)
+      }
+    },
+
     adicionarTarefa(tarefa: Omit<Tarefa, 'id' | 'dataCriacao'>) {
       const novaTarefa: Tarefa = {
         ...tarefa,
@@ -50,17 +81,20 @@ export const useTarefasStore = defineStore('tarefas', {
         dataCriacao: new Date()
       }
       this.tarefas.push(novaTarefa)
+      this.salvarDados()
     },
 
     atualizarTarefa(id: string, atualizacoes: Partial<Tarefa>) {
       const index = this.tarefas.findIndex(t => t.id === id)
       if (index !== -1) {
         this.tarefas[index] = { ...this.tarefas[index], ...atualizacoes }
+        this.salvarDados()
       }
     },
 
     removerTarefa(id: string) {
       this.tarefas = this.tarefas.filter(t => t.id !== id)
+      this.salvarDados()
     },
 
     adicionarSubtarefa(tarefaId: string, subtarefa: Omit<Subtarefa, 'id'>) {
@@ -70,6 +104,7 @@ export const useTarefasStore = defineStore('tarefas', {
           ...subtarefa,
           id: crypto.randomUUID()
         })
+        this.salvarDados()
       }
     },
 
@@ -79,6 +114,7 @@ export const useTarefasStore = defineStore('tarefas', {
         const subtarefa = tarefa.subtarefas.find(s => s.id === subtarefaId)
         if (subtarefa) {
           subtarefa.concluida = concluida
+          this.salvarDados()
         }
       }
     },
