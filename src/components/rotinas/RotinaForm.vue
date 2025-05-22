@@ -165,6 +165,7 @@ const emit = defineEmits<{
 }>()
 
 interface FormTarefa {
+  id?: string;
   titulo: string;
   concluida: boolean;
 }
@@ -213,18 +214,30 @@ function removerTarefa(index: number) {
 }
 
 function salvar() {
+  // Validação do formulário
+  if (!form.value.titulo.trim()) {
+    alert('O título da rotina é obrigatório');
+    return;
+  }
+  
   if (form.value.diasSemana.length === 0) {
-    alert('Selecione pelo menos um dia da semana')
-    return
+    alert('Selecione pelo menos um dia da semana');
+    return;
   }
   
   // Remover tarefas com título vazio
-  const tarefasValidas = form.value.tarefas.filter(t => t.titulo.trim() !== '')
+  const tarefasValidas = form.value.tarefas.filter(t => t.titulo.trim() !== '');
   
-  // Importante: Omitimos o campo id das tarefas aqui, mas a store vai adicionar no momento da criação
+  // Adicionar ID às tarefas para facilitar a manipulação
+  const tarefasComId = tarefasValidas.map(t => ({
+    ...t,
+    id: t.id || Math.random().toString(36).substring(2, 9)
+  }));
+  
+  // Emite o evento para salvar a rotina
   emit('salvar', {
     ...form.value,
-    tarefas: tarefasValidas
-  })
+    tarefas: tarefasComId
+  });
 }
 </script> 

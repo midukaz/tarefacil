@@ -9,76 +9,76 @@
         class="bg-white shadow sm:rounded-lg overflow-hidden"
       >
         <div class="px-4 py-5 sm:p-6">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center space-x-3">
-              <h3 class="text-lg font-medium text-gray-900">{{ tarefa.titulo }}</h3>
-              <span
-                :class="{
-                  'bg-yellow-100 text-yellow-800': tarefa.status === 'pendente',
-                  'bg-blue-100 text-blue-800': tarefa.status === 'em_andamento',
-                  'bg-green-100 text-green-800': tarefa.status === 'concluida'
-                }"
-                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-              >
-                {{ statusLabel[tarefa.status] }}
-              </span>
-              <span
-                :class="{
-                  'bg-gray-100 text-gray-800': tarefa.prioridade === 'baixa',
-                  'bg-orange-100 text-orange-800': tarefa.prioridade === 'media',
-                  'bg-red-100 text-red-800': tarefa.prioridade === 'alta'
-                }"
-                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
-              >
-                {{ prioridadeLabel[tarefa.prioridade] }}
-              </span>
-            </div>
-            <div class="flex justify-between mt-4">
-              <div class="flex space-x-3">
-                <button
-                  type="button"
-                  @click="$emit('editar', tarefa)"
-                  class="flex items-center rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500"
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-wrap items-center gap-2 mb-3 sm:mb-0">
+              <h3 class="text-lg font-medium text-gray-900 mr-2">{{ tarefa.titulo }}</h3>
+              <div class="flex flex-wrap gap-1.5">
+                <span
+                  :class="{
+                    'bg-yellow-100 text-yellow-800': tarefa.status === 'pendente',
+                    'bg-blue-100 text-blue-800': tarefa.status === 'em_andamento',
+                    'bg-green-100 text-green-800': tarefa.status === 'concluida'
+                  }"
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                 >
-                  <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                  </svg>
-                  Editar
-                </button>
-                <button
-                  type="button"
-                  @click="$emit('excluir', tarefa.id)"
-                  class="flex items-center rounded-md text-sm font-medium text-red-600 hover:text-red-500"
+                  {{ statusLabel[tarefa.status] }}
+                </span>
+                <span
+                  :class="{
+                    'bg-gray-100 text-gray-800': tarefa.prioridade === 'baixa',
+                    'bg-orange-100 text-orange-800': tarefa.prioridade === 'media',
+                    'bg-red-100 text-red-800': tarefa.prioridade === 'alta'
+                  }"
+                  class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium"
                 >
-                  <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                  </svg>
-                  Excluir
-                </button>
-                <button
-                  v-if="tarefa.status !== 'arquivada'"
-                  type="button"
-                  @click="$emit('arquivar', tarefa.id)"
-                  class="flex items-center rounded-md text-sm font-medium text-gray-600 hover:text-gray-500"
-                >
-                  <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                    <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
-                  </svg>
-                  Arquivar
-                </button>
-                <button
-                  v-if="tarefa.status === 'arquivada'"
-                  type="button"
-                  @click="$emit('arquivar', tarefa.id)"
-                  class="flex items-center rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500"
-                >
-                  <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                    <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v2H1V6a2 2 0 012-2h1V3a1 1 0 011-1zm11 9H4v8a1 1 0 001 1h10a1 1 0 001-1v-8z" clip-rule="evenodd" />
-                  </svg>
-                  Desarquivar
-                </button>
+                  {{ prioridadeLabel[tarefa.prioridade] }}
+                </span>
               </div>
+            </div>
+            <div class="flex flex-wrap gap-2 mt-2 sm:mt-0">
+              <button
+                type="button"
+                @click="$emit('editar', tarefa)"
+                class="flex items-center rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                </svg>
+                Editar
+              </button>
+              <button
+                type="button"
+                @click="$emit('excluir', tarefa.id)"
+                class="flex items-center rounded-md text-sm font-medium text-red-600 hover:text-red-500"
+              >
+                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                </svg>
+                Excluir
+              </button>
+              <button
+                v-if="tarefa.status !== 'arquivada'"
+                type="button"
+                @click="$emit('arquivar', tarefa.id)"
+                class="flex items-center rounded-md text-sm font-medium text-gray-600 hover:text-gray-500"
+              >
+                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
+                  <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
+                </svg>
+                Arquivar
+              </button>
+              <button
+                v-if="tarefa.status === 'arquivada'"
+                type="button"
+                @click="$emit('arquivar', tarefa.id)"
+                class="flex items-center rounded-md text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              >
+                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v2H1V6a2 2 0 012-2h1V3a1 1 0 011-1zm11 9H4v8a1 1 0 001 1h10a1 1 0 001-1v-8z" clip-rule="evenodd" />
+                </svg>
+                Desarquivar
+              </button>
             </div>
           </div>
 

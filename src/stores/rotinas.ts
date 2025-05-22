@@ -34,6 +34,21 @@ const DIAS_SEMANA_MAP: Record<DiaSemana, number> = {
   sabado: 6
 }
 
+// Função para gerar um UUID
+function generateUUID() {
+  // Verifica se a API crypto.randomUUID está disponível
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  } 
+  
+  // Implementação alternativa se não estiver disponível
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = Math.random() * 16 | 0;
+    const v = c === 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
 export const useRotinasStore = defineStore('rotinas', {
   state: () => ({
     rotinas: [] as Rotina[],
@@ -133,7 +148,7 @@ export const useRotinasStore = defineStore('rotinas', {
     adicionarRotina(rotina: Omit<Rotina, 'id' | 'dataCriacao'>) {
       const novaRotina: Rotina = {
         ...rotina,
-        id: crypto.randomUUID(),
+        id: generateUUID(),
         dataCriacao: new Date()
       }
       this.rotinas.push(novaRotina)
@@ -158,7 +173,7 @@ export const useRotinasStore = defineStore('rotinas', {
       if (rotina) {
         rotina.tarefas.push({
           ...tarefa,
-          id: crypto.randomUUID()
+          id: generateUUID()
         })
         this.salvarDados()
       }

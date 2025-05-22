@@ -7,11 +7,11 @@
     </div>
 
     <!-- Tabs para alternar entre tarefas normais e arquivadas -->
-    <div class="mb-6 border-b border-gray-200">
+    <div class="mb-6 border-b border-gray-200 overflow-x-auto">
       <nav class="-mb-px flex space-x-8" aria-label="Tabs">
         <button
           @click="visualizacao = 'ativas'"
-          class="py-2 px-1 border-b-2 text-sm font-medium"
+          class="py-2 px-1 border-b-2 text-sm font-medium whitespace-nowrap"
           :class="visualizacao === 'ativas' 
             ? 'border-indigo-500 text-indigo-600' 
             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -20,7 +20,7 @@
         </button>
         <button
           @click="visualizacao = 'arquivadas'"
-          class="py-2 px-1 border-b-2 text-sm font-medium"
+          class="py-2 px-1 border-b-2 text-sm font-medium whitespace-nowrap"
           :class="visualizacao === 'arquivadas' 
             ? 'border-indigo-500 text-indigo-600' 
             : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
@@ -53,7 +53,7 @@
         </div>
         
         <!-- Seletores de filtro -->
-        <div class="flex flex-wrap gap-3">
+        <div class="flex flex-col sm:flex-row flex-wrap gap-3">
           <div class="text-sm text-gray-500 self-center mr-2">Filtrar por:</div>
           <select
             id="filtroStatus"
@@ -68,7 +68,7 @@
           
           <select 
             v-model="tarefasStore.filtro.prioridade" 
-            class="text-sm rounded-md border-gray-200 py-1.5 pr-8 bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
+            class="text-sm rounded-md border-gray-200 py-2 px-3 bg-gray-50 border border-gray-200 focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
           >
             <option value="todos">Todas prioridades</option>
             <option value="baixa">Baixa</option>
@@ -78,7 +78,7 @@
 
           <button
             @click="mostrarFormulario = true"
-            class="ml-auto flex items-center gap-1.5 rounded-md bg-indigo-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-600 transition-colors hidden md:block "
+            class="ml-auto flex items-center gap-1.5 rounded-md bg-indigo-500 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-600 transition-colors sm:hidden md:flex"
           >
             Nova tarefa
           </button>
@@ -152,7 +152,7 @@
         @click.self="fecharFormulario"
       >
         <div 
-          class="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all"
+          class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all"
           :class="{ 'opacity-100 scale-100': mostrarFormulario, 'opacity-0 scale-95': !mostrarFormulario }"
         >
           <TarefaForm
@@ -163,16 +163,6 @@
         </div>
       </div>
     </transition>
-
-    <!-- Botão de depuração (temporário) -->
-    <div class="fixed bottom-5 left-5 z-40" v-if="visualizacao === 'ativas'">
-      <button
-        @click="corrigirSubtarefasIDs"
-        class="flex items-center justify-center px-3 py-2 rounded-md bg-yellow-500 text-white text-sm shadow-lg hover:bg-yellow-600 transition-colors"
-      >
-        Corrigir IDs Subtarefas
-      </button>
-    </div>
   </div>
 </template>
 
@@ -232,48 +222,5 @@ function atualizarSubtarefa(tarefaId: string, subtarefaId: string, concluida: bo
 function fecharFormulario() {
   mostrarFormulario.value = false
   tarefaSelecionada.value = undefined
-}
-
-function corrigirSubtarefasIDs() {
-  console.log("Iniciando correção dos IDs das subtarefas...");
-  
-  // Iterar por todas as tarefas e garantir que todas as subtarefas tenham IDs
-  let tarefasAtualizadas = false;
-  
-  const tarefas = tarefasStore.tarefas.map(tarefa => {
-    // Verificar se há alguma subtarefa sem ID
-    const subtarefasCorrigidas = tarefa.subtarefas.map(subtarefa => {
-      if (!subtarefa.id) {
-        tarefasAtualizadas = true;
-        console.log(`Corrigindo subtarefa sem ID: "${subtarefa.titulo}" na tarefa "${tarefa.titulo}"`);
-        return {
-          ...subtarefa,
-          id: crypto.randomUUID()
-        };
-      }
-      return subtarefa;
-    });
-    
-    // Se houve alguma alteração nas subtarefas
-    if (subtarefasCorrigidas.some((s, idx) => s.id !== tarefa.subtarefas[idx].id)) {
-      return {
-        ...tarefa,
-        subtarefas: subtarefasCorrigidas
-      };
-    }
-    
-    return tarefa;
-  });
-  
-  if (tarefasAtualizadas) {
-    // Substituir as tarefas no store
-    tarefasStore.$patch({ tarefas });
-    tarefasStore.salvarDados();
-    console.log("Correção concluída! IDs gerados para todas as subtarefas.");
-    alert("Correção concluída! IDs gerados para todas as subtarefas.");
-  } else {
-    console.log("Nenhuma correção necessária. Todas as subtarefas já possuem IDs.");
-    alert("Nenhuma correção necessária. Todas as subtarefas já possuem IDs.");
-  }
 }
 </script> 

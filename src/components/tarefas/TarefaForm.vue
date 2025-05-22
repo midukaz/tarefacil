@@ -128,9 +128,9 @@
 
       <!-- Subtarefas - Interface simplificada -->
       <div>
-        <div class="flex justify-between items-center mb-1">
-          <label class="block text-sm font-medium text-gray-700">Subtarefas</label>
-          <div class="flex gap-2">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-2">
+          <label class="block text-sm font-medium text-gray-700 mb-1 sm:mb-0">Subtarefas</label>
+          <div class="flex flex-wrap gap-2 mt-1 sm:mt-0">
             <button 
               type="button" 
               @click="marcarTodasSubtarefas(true)" 
@@ -142,7 +142,7 @@
             <button 
               type="button" 
               @click="marcarTodasSubtarefas(false)" 
-              class="text-xs text-gray-500 hover:text-gray-600 ml-2"
+              class="text-xs text-gray-500 hover:text-gray-600"
               v-if="form.subtarefas.length > 0"
             >
               Desmarcar todas
@@ -150,7 +150,7 @@
             <button 
               type="button" 
               @click="adicionarSubtarefa" 
-              class="text-xs text-indigo-500 hover:text-indigo-600 ml-2"
+              class="text-xs text-indigo-500 hover:text-indigo-600"
             >
               + Adicionar
             </button>

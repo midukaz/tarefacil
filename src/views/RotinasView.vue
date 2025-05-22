@@ -25,7 +25,7 @@
         </div>
         
         <!-- Filtros de dias da semana -->
-        <div class="flex flex-wrap gap-2">
+        <div class="flex flex-col sm:flex-row flex-wrap gap-2">
           <div class="text-sm text-gray-500 self-center mr-2">Filtrar por dia:</div>
           
           <div class="flex flex-wrap gap-1.5">
@@ -54,7 +54,7 @@
 
           <button
             @click="mostrarFormulario = true"
-            class="ml-auto flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors"
+            class="ml-auto flex items-center gap-1.5 rounded-md bg-amber-500 px-3 py-1.5 text-sm font-medium text-white hover:bg-amber-600 transition-colors sm:mt-0 mt-2"
           >
             <svg class="w-4 h-4" stroke="currentColor" fill="none" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -109,7 +109,7 @@
         @click.self="fecharFormulario"
       >
         <div 
-          class="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all"
+          class="bg-white rounded-lg shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto transform transition-all"
           :class="{ 'opacity-100 scale-100': mostrarFormulario, 'opacity-0 scale-95': !mostrarFormulario }"
         >
           <RotinaForm
