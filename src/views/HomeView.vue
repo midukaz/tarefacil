@@ -1,5 +1,70 @@
 <template>
   <div class="max-w-5xl mx-auto w-full p-4 py-6">
+    <!-- Alerta de lembretes importantes -->
+    <div v-if="showAlert && alertItems.length > 0" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden shadow-sm">
+      <div class="px-4 py-3 bg-yellow-100 border-b border-yellow-200 flex items-center justify-between">
+        <h2 class="font-semibold text-yellow-800 flex items-center">
+          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+          </svg>
+          Lembretes Importantes
+        </h2>
+        <button @click="closeAlert" class="text-yellow-800 hover:text-yellow-900">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+      
+      <div class="p-4">
+        <ul class="divide-y divide-yellow-100">
+          <li v-for="(item, index) in alertItems.slice(0, 3)" :key="index" class="py-3 flex items-start">
+            <span class="h-5 w-5 mt-0.5 flex-shrink-0" :class="getAlertIconClass(item.type)">
+              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getAlertIconPath(item.type)" />
+              </svg>
+            </span>
+            <div class="ml-3 flex-1">
+              <p class="text-sm font-medium text-gray-800">{{ item.titulo }}</p>
+              <p class="text-xs mt-0.5" :class="getAlertTextClass(item.type)">
+                {{ item.mensagem }}
+              </p>
+              
+              <div class="mt-2 flex gap-2">
+                <button 
+                  v-if="item.tipo === 'tarefa'"
+                  @click="marcarTarefaComoArquivada(item.item.id)" 
+                  class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
+                >
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                  </svg>
+                  Arquivar
+                </button>
+                
+                <button 
+                  v-if="item.tipo === 'evento'"
+                  @click="marcarEventoComoArquivado(item.item.id)" 
+                  class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
+                >
+                  <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+                  </svg>
+                  Arquivar
+                </button>
+              </div>
+            </div>
+          </li>
+        </ul>
+        
+        <div v-if="alertItems.length > 3" class="mt-3 text-center">
+          <button @click="showAllAlerts" class="text-sm text-yellow-700 hover:text-yellow-900 font-medium">
+            Ver todos os {{ alertItems.length }} lembretes
+          </button>
+        </div>
+      </div>
+    </div>
+    
     <!-- Cabeçalho com resumo -->
     <div class="mb-8">
       <h1 class="text-2xl font-bold text-gray-900">Olá</h1>
@@ -23,27 +88,7 @@
     </div>
     
     <!-- Menu de navegação rápida -->
-    <div class="flex justify-between mb-6 border-b border-gray-100 pb-4">
-      <div class="flex space-x-6">
-        <router-link to="/tarefas" class="flex items-center text-gray-500 hover:text-indigo-600">
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-          </svg>
-          <span class="text-sm font-medium">Tarefas</span>
-        </router-link>
-        <router-link to="/eventos" class="flex items-center text-gray-500 hover:text-rose-600">
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          <span class="text-sm font-medium">Eventos</span>
-        </router-link>
-        <router-link to="/rotinas" class="flex items-center text-gray-500 hover:text-amber-600">
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          <span class="text-sm font-medium">Rotinas</span>
-        </router-link>
-      </div>
+    <div class="flex justify-end mb-6 border-b border-gray-100 pb-4">
       
       <!-- Dropdown de adicionar novo -->
       <div class="relative" ref="addMenuRef">
@@ -300,13 +345,129 @@
 import { useTarefasStore } from '../stores/tarefas'
 import { useEventosStore } from '../stores/eventos'
 import { useRotinasStore } from '../stores/rotinas'
-import { onMounted, ref, onBeforeUnmount } from 'vue'
+import { onMounted, ref, onBeforeUnmount, computed } from 'vue'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
 const tarefasStore = useTarefasStore()
 const eventosStore = useEventosStore()
 const rotinasStore = useRotinasStore()
+
+// Estado para o alerta
+const showAlert = ref(true)
+
+function closeAlert() {
+  showAlert.value = false
+}
+
+// Adicionar tipos para os alertas
+type AlertType = 'danger' | 'warning' | 'info' | 'success';
+
+interface AlertItem {
+  tipo: 'tarefa' | 'evento' | 'rotina';
+  type: AlertType;
+  titulo: string;
+  mensagem: string;
+  item: any;
+}
+
+// Items para o alerta
+const alertItems = computed<AlertItem[]>(() => {
+  const items: AlertItem[] = [];
+  
+  // Adicionar tarefas atrasadas
+  tarefasStore.tarefasAtrasadas.slice(0, 2).forEach(tarefa => {
+    if (tarefa.dataVencimento) {
+      items.push({
+        tipo: 'tarefa',
+        type: 'danger',
+        titulo: tarefa.titulo,
+        mensagem: `Tarefa atrasada! Venceu em ${formatarData(tarefa.dataVencimento)}`,
+        item: tarefa
+      });
+    }
+  });
+  
+  // Adicionar eventos de hoje
+  eventosStore.eventosHoje.slice(0, 2).forEach(evento => {
+    items.push({
+      tipo: 'evento',
+      type: 'info',
+      titulo: evento.titulo,
+      mensagem: `Evento hoje às ${formatarHora(evento.dataInicio)} em ${evento.local}`,
+      item: evento
+    });
+  });
+  
+  // Adicionar tarefas para hoje
+  tarefasStore.tarefasHoje.slice(0, 2).forEach(tarefa => {
+    items.push({
+      tipo: 'tarefa',
+      type: 'warning',
+      titulo: tarefa.titulo,
+      mensagem: `Tarefa para hoje - ${statusFormatado(tarefa.status)}`,
+      item: tarefa
+    });
+  });
+  
+  // Adicionar rotinas para hoje
+  rotinasStore.rotinasHoje.slice(0, 2).forEach(rotina => {
+    items.push({
+      tipo: 'rotina',
+      type: 'success',
+      titulo: rotina.titulo,
+      mensagem: `Rotina programada para ${rotina.horario}`,
+      item: rotina
+    });
+  });
+  
+  return items.sort((a, b) => {
+    // Prioridade: 1. Tarefas atrasadas, 2. Eventos de hoje, 3. Tarefas para hoje, 4. Rotinas
+    const prioridade = { danger: 0, info: 1, warning: 2, success: 3 }
+    return prioridade[a.type] - prioridade[b.type]
+  })
+})
+
+function showAllAlerts() {
+  // Aqui você poderia abrir um modal com todos os alertas ou navegar para uma página de alertas
+  // Por enquanto apenas mantém o alert aberto
+  showAlert.value = true
+}
+
+function getAlertIconClass(type: AlertType): string {
+  switch(type) {
+    case 'danger': return 'text-red-500';
+    case 'warning': return 'text-yellow-500';
+    case 'info': return 'text-blue-500';
+    case 'success': return 'text-green-500';
+    default: return 'text-gray-500';
+  }
+}
+
+function getAlertTextClass(type: AlertType): string {
+  switch(type) {
+    case 'danger': return 'text-red-600';
+    case 'warning': return 'text-yellow-600';
+    case 'info': return 'text-blue-600';
+    case 'success': return 'text-green-600';
+    default: return 'text-gray-600';
+  }
+}
+
+function getAlertIconPath(type: AlertType): string {
+  switch(type) {
+    case 'danger':
+      return 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+    case 'warning':
+      return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z';
+    case 'info':
+      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';
+    case 'success':
+      return 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
+    default:
+      return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+  }
+}
 
 // Menu dropdown de adicionar
 const showAddMenu = ref(false)
@@ -348,11 +509,27 @@ function formatarHora(data: Date): string {
 }
 
 function statusFormatado(status: string): string {
-  const statusMap: Record<string, string> = {
-    'pendente': 'Pendente',
-    'em_andamento': 'Em andamento',
-    'concluida': 'Concluída'
+  switch (status) {
+    case 'pendente':
+      return 'Pendente';
+    case 'em_andamento':
+      return 'Em andamento';
+    case 'concluida':
+      return 'Concluída';
+    default:
+      return status;
   }
-  return statusMap[status] || status
+}
+
+function marcarTarefaComoArquivada(id: string) {
+  tarefasStore.marcarComoArquivada(id, true);
+  // Atualiza a lista de alertas removendo o item arquivado
+  showAlert.value = alertItems.value.length > 0;
+}
+
+function marcarEventoComoArquivado(id: string) {
+  eventosStore.marcarComoArquivado(id, true);
+  // Atualiza a lista de alertas removendo o item arquivado
+  showAlert.value = alertItems.value.length > 0;
 }
 </script> 

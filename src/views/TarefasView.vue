@@ -6,8 +6,36 @@
       <p class="text-gray-600">Organize suas tarefas e acompanhe seu progresso</p>
     </div>
 
-    <!-- Barra de filtros -->
-    <div class="bg-white rounded-lg shadow-sm mb-6 p-4">
+    <!-- Tabs para alternar entre tarefas normais e arquivadas -->
+    <div class="mb-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+        <button
+          @click="visualizacao = 'ativas'"
+          class="py-2 px-1 border-b-2 text-sm font-medium"
+          :class="visualizacao === 'ativas' 
+            ? 'border-indigo-500 text-indigo-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        >
+          Tarefas Ativas
+        </button>
+        <button
+          @click="visualizacao = 'arquivadas'"
+          class="py-2 px-1 border-b-2 text-sm font-medium"
+          :class="visualizacao === 'arquivadas' 
+            ? 'border-indigo-500 text-indigo-600' 
+            : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        >
+          Tarefas Arquivadas
+          <span v-if="tarefasStore.tarefasArquivadas.length > 0" 
+            class="ml-2 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-indigo-500 rounded-full">
+            {{ tarefasStore.tarefasArquivadas.length }}
+          </span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Barra de filtros (apenas para tarefas ativas) -->
+    <div class="bg-white rounded-lg shadow-sm mb-6 p-4" v-if="visualizacao === 'ativas'">
       <div class="flex flex-col gap-4">
         <!-- Busca -->
         <div class="relative">
@@ -17,7 +45,7 @@
             </svg>
           </div>
           <input
-            v-model="store.filtro.busca"
+            v-model="tarefasStore.filtro.busca"
             type="search"
             placeholder="Buscar tarefas..."
             class="w-full pl-10 pr-4 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
@@ -27,9 +55,10 @@
         <!-- Seletores de filtro -->
         <div class="flex flex-wrap gap-3">
           <div class="text-sm text-gray-500 self-center mr-2">Filtrar por:</div>
-          <select 
-            v-model="store.filtro.status" 
-            class="text-sm rounded-md border-gray-200  py-1.5 pr-8 focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
+          <select
+            id="filtroStatus"
+            v-model="tarefasStore.filtro.status"
+            class="px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300 outline-none"
           >
             <option value="todos">Todos os status</option>
             <option value="pendente">Pendente</option>
@@ -38,8 +67,8 @@
           </select>
           
           <select 
-            v-model="store.filtro.prioridade" 
-            class="text-sm rounded-md border-gray-200 py-1.5 pr-8 focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
+            v-model="tarefasStore.filtro.prioridade" 
+            class="text-sm rounded-md border-gray-200 py-1.5 pr-8 bg-gray-50 border border-gray-200 rounded-md focus:ring-1 focus:ring-indigo-300 focus:border-indigo-300"
           >
             <option value="todos">Todas prioridades</option>
             <option value="baixa">Baixa</option>
@@ -59,19 +88,42 @@
 
     <!-- Lista de tarefas -->
     <div>
-      <ListaTarefas
-        :tarefas="store.tarefasFiltradas"
-        @editar="editarTarefa"
-        @excluir="excluirTarefa"
-        @atualizar-subtarefa="atualizarSubtarefa"
-      />
-      
-      <div v-if="store.tarefasFiltradas.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
-        <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-        </svg>
-        <p class="text-gray-500 mb-1">Nenhuma tarefa encontrada</p>
-        <p class="text-sm text-gray-400">Crie uma nova tarefa ou ajuste os filtros</p>
+      <!-- Tarefas ativas -->
+      <div v-if="visualizacao === 'ativas'">
+        <ListaTarefas
+          :tarefas="tarefasStore.tarefasFiltradas"
+          @editar="editarTarefa"
+          @excluir="excluirTarefa"
+          @atualizar-subtarefa="atualizarSubtarefa"
+          @arquivar="marcarComoArquivada"
+        />
+        
+        <div v-if="tarefasStore.tarefasFiltradas.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
+          <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
+          <p class="text-gray-500 mb-1">Nenhuma tarefa encontrada</p>
+          <p class="text-sm text-gray-400">Crie uma nova tarefa ou ajuste os filtros</p>
+        </div>
+      </div>
+
+      <!-- Tarefas arquivadas -->
+      <div v-if="visualizacao === 'arquivadas'">
+        <ListaTarefas
+          :tarefas="tarefasStore.tarefasArquivadas"
+          @editar="editarTarefa"
+          @excluir="excluirTarefa"
+          @atualizar-subtarefa="atualizarSubtarefa"
+          @arquivar="desarquivarTarefa"
+        />
+        
+        <div v-if="tarefasStore.tarefasArquivadas.length === 0" class="py-12 flex flex-col items-center justify-center text-center">
+          <svg class="w-16 h-16 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+          </svg>
+          <p class="text-gray-500 mb-1">Nenhuma tarefa arquivada</p>
+          <p class="text-sm text-gray-400">As tarefas arquivadas aparecerão aqui</p>
+        </div>
       </div>
     </div>
 
@@ -121,13 +173,14 @@ import type { Tarefa } from '../stores/tarefas'
 import ListaTarefas from '../components/tarefas/ListaTarefas.vue'
 import TarefaForm from '../components/tarefas/TarefaForm.vue'
 
-const store = useTarefasStore()
+const tarefasStore = useTarefasStore()
 const mostrarFormulario = ref(false)
 const tarefaSelecionada = ref<Tarefa | undefined>()
+const visualizacao = ref<'ativas' | 'arquivadas'>('ativas')
 
 // Carregar dados ao iniciar o componente
 onMounted(() => {
-  store.carregarDados()
+  tarefasStore.carregarDados()
 })
 
 function editarTarefa(tarefa: Tarefa) {
@@ -137,21 +190,33 @@ function editarTarefa(tarefa: Tarefa) {
 
 function excluirTarefa(id: string) {
   if (confirm('Tem certeza que deseja excluir esta tarefa?')) {
-    store.removerTarefa(id)
+    tarefasStore.removerTarefa(id)
   }
 }
 
 function salvarTarefa(tarefa: Omit<Tarefa, 'id' | 'dataCriacao'>) {
   if (tarefaSelecionada.value) {
-    store.atualizarTarefa(tarefaSelecionada.value.id, tarefa)
+    tarefasStore.atualizarTarefa(tarefaSelecionada.value.id, tarefa)
   } else {
-    store.adicionarTarefa(tarefa)
+    tarefasStore.adicionarTarefa(tarefa)
   }
   fecharFormulario()
 }
 
+function marcarComoArquivada(id: string) {
+  if (confirm('Deseja arquivar esta tarefa?')) {
+    tarefasStore.marcarComoArquivada(id, true)
+  }
+}
+
+function desarquivarTarefa(id: string) {
+  if (confirm('Deseja desarquivar esta tarefa?')) {
+    tarefasStore.marcarComoArquivada(id, false)
+  }
+}
+
 function atualizarSubtarefa(tarefaId: string, subtarefaId: string, concluida: boolean) {
-  store.atualizarSubtarefa(tarefaId, subtarefaId, concluida)
+  tarefasStore.atualizarSubtarefa(tarefaId, subtarefaId, concluida)
 }
 
 function fecharFormulario() {
