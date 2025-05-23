@@ -1,54 +1,49 @@
 <template>
-  <nav class="bg-white shadow-sm border-b border-gray-100">
-    <div class="max-w-5xl mx-auto px-4">
+  <nav class="bg-white border-b border-gray-100">
+    <div class="max-w-4xl mx-auto px-4">
       <div class="flex items-center justify-between h-16">
-        <!-- Logo -->
-        <div class="flex-shrink-0 flex items-center">
+        <!-- Logo original -->
+        <div class="flex-shrink-0">
           <router-link to="/" class="text-xl font-medium text-indigo-600 flex items-center gap-2">
             <img src="/favicon.svg" alt="Logo" class="w-8 h-8">
             <span class="text-zinc-600 font-bold">TareFácil</span>
           </router-link>
         </div>
         
-        <!-- Menu principal -->
+        <!-- Menu principal desktop -->
         <div class="hidden md:block">
-          <div class="flex items-center space-x-4">
+          <div class="flex items-center space-x-1 bg-gray-50 rounded-xl p-1">
             <router-link 
               v-for="item in menuItems" 
               :key="item.path" 
               :to="item.path"
-              class="px-3 py-2 text-sm font-medium rounded-md transition-colors flex items-center"
-              :class="[$route.path === item.path ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50']"
+              class="px-4 py-2 text-sm font-medium rounded-lg transition-all duration-200 flex items-center gap-2 min-w-0"
+              :class="isActiveRoute(item.path) 
+                ? 'bg-white text-gray-900 shadow-sm' 
+                : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'"
             >
-              <span class="mr-1.5">
-                <component :is="item.icon" class="w-5 h-5" aria-hidden="true" />
-              </span>
-              {{ item.name }}
+              <component :is="item.icon" class="w-4 h-4 flex-shrink-0" />
+              <span class="truncate">{{ item.name }}</span>
             </router-link>
           </div>
         </div>
         
         <!-- Menu mobile (ícone) -->
-        <div class="block md:hidden">
+        <div class="md:hidden">
           <button 
             @click="mobileMenuOpen = !mobileMenuOpen" 
-            class="p-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 focus:outline-none"
+            class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors duration-200"
           >
-            <svg
-              class="h-6 w-6"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path
-                :class="{'hidden': mobileMenuOpen, 'inline-flex': !mobileMenuOpen }"
+                v-if="!mobileMenuOpen"
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M4 6h16M4 12h16M4 18h16"
               />
               <path
-                :class="{'hidden': !mobileMenuOpen, 'inline-flex': mobileMenuOpen }"
+                v-else
                 stroke-linecap="round"
                 stroke-linejoin="round"
                 stroke-width="2"
@@ -60,24 +55,33 @@
       </div>
     </div>
     
-    <!-- Menu mobile (expandido) -->
-    <div :class="{'block': mobileMenuOpen, 'hidden': !mobileMenuOpen}" class="md:hidden">
-      <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-        <router-link 
-          v-for="item in menuItems" 
-          :key="item.path" 
-          :to="item.path"
-          class="block px-3 py-2 text-base font-medium rounded-md transition-colors flex items-center"
-          :class="[$route.path === item.path ? 'bg-indigo-50 text-indigo-600' : 'text-gray-600 hover:text-gray-800 hover:bg-gray-50']"
-          @click="mobileMenuOpen = false"
-        >
-          <span class="mr-2">
-            <component :is="item.icon" class="w-5 h-5" aria-hidden="true" />
-          </span>
-          {{ item.name }}
-        </router-link>
+    <!-- Menu mobile expandido -->
+    <transition
+      enter-active-class="transition-all duration-300 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-200 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-gray-100 bg-white">
+        <div class="px-4 py-4 space-y-2">
+          <router-link 
+            v-for="item in menuItems" 
+            :key="item.path" 
+            :to="item.path"
+            class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl transition-all duration-200"
+            :class="isActiveRoute(item.path)
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'"
+            @click="mobileMenuOpen = false"
+          >
+            <component :is="item.icon" class="w-5 h-5 flex-shrink-0" />
+            <span>{{ item.name }}</span>
+          </router-link>
+        </div>
       </div>
-    </div>
+    </transition>
   </nav>
 </template>
 
@@ -88,7 +92,15 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const mobileMenuOpen = ref(false)
 
-// Definição dos ícones
+// Função para verificar se a rota está ativa
+function isActiveRoute(path: string): boolean {
+  if (path === '/') {
+    return route.path === '/'
+  }
+  return route.path.startsWith(path)
+}
+
+// Definição dos ícones minimalistas
 const HomeIcon = defineComponent({
   name: 'HomeIcon',
   render() {
@@ -102,7 +114,7 @@ const HomeIcon = defineComponent({
         'stroke-linecap': 'round', 
         'stroke-linejoin': 'round', 
         'stroke-width': '2', 
-        d: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' 
+        d: 'm3 12 2-2m0 0 7-7 7 7M5 10v10a1 1 0 0 0 1 1h3m10-11 2 2m-2-2v10a1 1 0 0 1-1 1h-3m-6 0a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1m-6 0h6' 
       })
     ])
   }
@@ -121,7 +133,7 @@ const TaskIcon = defineComponent({
         'stroke-linecap': 'round', 
         'stroke-linejoin': 'round', 
         'stroke-width': '2', 
-        d: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4' 
+        d: 'M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-6 9 2 2 4-4' 
       })
     ])
   }
@@ -140,7 +152,7 @@ const CalendarIcon = defineComponent({
         'stroke-linecap': 'round', 
         'stroke-linejoin': 'round', 
         'stroke-width': '2', 
-        d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z' 
+        d: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2z' 
       })
     ])
   }
@@ -159,7 +171,7 @@ const ClockIcon = defineComponent({
         'stroke-linecap': 'round', 
         'stroke-linejoin': 'round', 
         'stroke-width': '2', 
-        d: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z' 
+        d: 'M12 8v4l3 3m6-3a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z' 
       })
     ])
   }
