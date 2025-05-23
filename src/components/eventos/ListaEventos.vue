@@ -1,161 +1,138 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3">
     <!-- Lista de Eventos -->
-    <div class="space-y-4">
+    <div class="space-y-3">
       <div
         v-for="evento in eventos"
         :key="evento.id"
-        class="bg-white shadow-sm rounded-lg overflow-hidden"
-        :class="{'opacity-75 bg-gray-50': evento.concluido}"
+        class="group bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md hover:border-gray-200 transition-all duration-200"
       >
-        <div class="px-4 py-5 sm:p-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div class="flex items-start gap-3 mb-3 sm:mb-0">
-              <div
-                class="w-3 h-3 rounded-full mt-2"
-                :class="evento.concluido ? 'bg-gray-400' : getPrioridadeColor(evento.prioridade)"
-              ></div>
-              <div>
-                <h3 class="text-lg font-medium" :class="evento.concluido ? 'text-gray-500' : 'text-gray-900'">{{ evento.titulo }}</h3>
-                <p class="text-sm mt-1" :class="evento.concluido ? 'text-gray-400' : 'text-gray-500'">{{ evento.descricao }}</p>
+        <!-- Cabeçalho do evento -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-lg font-medium text-gray-900 truncate">{{ evento.titulo }}</h3>
+              <div class="flex gap-1.5">
+                <!-- Status concluído -->
+                <span
+                  v-if="evento.concluido"
+                  class="px-2 py-1 text-xs font-medium bg-green-50 text-green-700 border border-green-200 rounded-md"
+                >
+                  Concluído
+                </span>
+                <!-- Prioridade -->
+                <span
+                  :class="{
+                    'bg-gray-50 text-gray-600 border-gray-200': evento.prioridade === 'baixa',
+                    'bg-orange-50 text-orange-700 border-orange-200': evento.prioridade === 'media',
+                    'bg-red-50 text-red-700 border-red-200': evento.prioridade === 'alta'
+                  }"
+                  class="px-2 py-1 text-xs font-medium rounded-md border"
+                >
+                  {{ prioridadeLabel[evento.prioridade] }}
+                </span>
+                <!-- Categoria -->
+                <span class="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+                  {{ evento.categoria }}
+                </span>
               </div>
             </div>
-
-            <div class="flex flex-wrap gap-2">
-              <button
-                @click="$emit('editar', evento)"
-                :class="evento.concluido ? 'text-gray-400 hover:text-gray-500' : 'text-rose-600 hover:text-rose-500'"
-                class="text-sm font-medium flex items-center"
-              >
-                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
-                </svg>
-                Editar
-              </button>
-              <button
-                @click="$emit('excluir', evento.id)"
-                class="text-sm font-medium flex items-center text-red-600 hover:text-red-500"
-              >
-                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
-                </svg>
-                Excluir
-              </button>
-              <button
-                v-if="!evento.arquivado"
-                @click="$emit('arquivar', evento.id)"
-                class="text-sm font-medium flex items-center text-yellow-600 hover:text-yellow-500"
-              >
-                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path d="M4 3a2 2 0 100 4h12a2 2 0 100-4H4z" />
-                  <path fill-rule="evenodd" d="M3 8h14v7a2 2 0 01-2 2H5a2 2 0 01-2-2V8zm5 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" clip-rule="evenodd" />
-                </svg>
-                Arquivar
-              </button>
-              <button
-                v-if="evento.arquivado"
-                @click="$emit('desarquivar', evento.id)"
-                class="text-sm font-medium flex items-center text-yellow-600 hover:text-yellow-500"
-              >
-                <svg class="h-4 w-4 mr-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
-                  <path fill-rule="evenodd" d="M5 2a1 1 0 011 1v1h8V3a1 1 0 112 0v1h1a2 2 0 012 2v2H1V6a2 2 0 012-2h1V3a1 1 0 011-1zm11 9H4v8a1 1 0 001 1h10a1 1 0 001-1v-8z" clip-rule="evenodd" />
-                </svg>
-                Desarquivar
-              </button>
-            </div>
-          </div>
-
-          <!-- Detalhes do evento -->
-          <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div :class="evento.concluido ? 'bg-gray-100' : 'bg-gray-50'" class="rounded-md p-3">
-              <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                <span class="font-medium">Data e hora</span>
-              </div>
-              <div class="text-sm" :class="evento.concluido ? 'text-gray-500' : 'text-gray-700'">
-                <div>Início: {{ formatarDataHora(evento.dataInicio) }}</div>
-                <div>Término: {{ formatarDataHora(evento.dataFim) }}</div>
-                <div class="text-xs text-gray-500 mt-1">Duração: {{ calcularDuracao(evento.dataInicio, evento.dataFim) }}</div>
-              </div>
-            </div>
+            <p v-if="evento.descricao" class="text-sm text-gray-600 leading-relaxed mb-3">{{ evento.descricao }}</p>
             
-            <div :class="evento.concluido ? 'bg-gray-100' : 'bg-gray-50'" class="rounded-md p-3">
-              <div class="flex items-center gap-2 text-sm text-gray-500 mb-1">
+            <!-- Informações do evento -->
+            <div class="space-y-2 text-sm text-gray-500">
+              <div class="flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span>{{ formatarDataHora(evento.dataInicio) }}</span>
+                <span v-if="evento.dataInicio.getTime() !== evento.dataFim.getTime()">
+                  até {{ formatarDataHora(evento.dataFim) }}
+                </span>
+              </div>
+              <div v-if="evento.local" class="flex items-center gap-2">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
-                <span class="font-medium">Local</span>
-              </div>
-              <div class="text-sm" :class="evento.concluido ? 'text-gray-500' : 'text-gray-700'">
-                {{ evento.local || 'Não especificado' }}
+                <span>{{ evento.local }}</span>
               </div>
             </div>
           </div>
 
-          <!-- Tags de categoria e status -->
-          <div class="mt-4 flex flex-wrap items-center gap-2">
-            <span 
-              v-if="evento.categoria" 
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              :class="evento.concluido ? 'bg-gray-100 text-gray-600' : 'bg-amber-100 text-amber-800'"
+          <!-- Menu de ações -->
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              v-if="!evento.concluido"
+              @click="$emit('marcar-concluido', evento.id, true)"
+              class="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+              title="Marcar como concluído"
             >
-              {{ evento.categoria }}
-            </span>
-            
-            <span 
-              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
-              :class="evento.concluido ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'"
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+            <button
+              v-if="evento.concluido"
+              @click="$emit('marcar-concluido', evento.id, false)"
+              class="p-2 text-gray-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors"
+              title="Desmarcar conclusão"
             >
-              {{ evento.concluido ? 'Concluído' : 'Pendente' }}
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <button
+              @click="$emit('editar', evento)"
+              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              title="Editar evento"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button
+              @click="$emit('excluir', evento.id)"
+              class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              title="Excluir evento"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Lembretes -->
+        <div v-if="evento.lembretes.length > 0" class="mb-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-2">Lembretes</h4>
+          <div class="flex flex-wrap gap-2">
+            <span
+              v-for="lembrete in evento.lembretes"
+              :key="lembrete.id"
+              class="px-2 py-1 text-xs font-medium rounded-md"
+              :class="lembrete.enviado 
+                ? 'bg-green-50 text-green-700 border border-green-200' 
+                : 'bg-amber-50 text-amber-700 border border-amber-200'"
+            >
+              {{ formatarDataHora(lembrete.data) }}
+              {{ lembrete.enviado ? '✓' : '⏰' }}
             </span>
           </div>
+        </div>
 
-          <!-- Lembretes -->
-          <div v-if="evento.lembretes.length > 0" class="mt-4">
-            <h4 class="text-sm font-medium mb-2" :class="evento.concluido ? 'text-gray-500' : 'text-gray-700'">Lembretes</h4>
-            <ul class="space-y-1">
-              <li
-                v-for="lembrete in evento.lembretes"
-                :key="lembrete.id"
-                class="flex items-center gap-2 text-sm"
-              >
-                <span
-                  class="inline-flex items-center px-2 py-0.5 rounded text-xs"
-                  :class="evento.concluido || lembrete.enviado ? 'bg-gray-100 text-gray-600' : 'bg-amber-50 text-amber-700'"
-                >
-                  {{ formatarDataHora(lembrete.data) }}
-                </span>
-                <span v-if="lembrete.enviado" class="text-xs text-gray-500">
-                  (Enviado)
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <!-- Controle rápido para marcar como concluído -->
-          <div class="mt-4 pt-3 border-t border-gray-100">
-            <div class="flex items-center">
-              <input
-                type="checkbox"
-                :checked="evento.concluido"
-                @change="handleConcluidoChange(evento.id, $event)"
-                class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-              />
-              <label class="ml-2 text-sm" :class="evento.concluido ? 'text-gray-500' : 'text-gray-700'">
-                Marcar como concluído
-              </label>
-            </div>
-          </div>
-
-          <!-- Data de criação -->
-          <div class="mt-4 text-xs text-gray-400">
-            Criado em: {{ formatarData(evento.dataCriacao) }}
-            <span v-if="evento.arquivado && evento.dataArquivamento">
-              | Arquivado em: {{ formatarData(evento.dataArquivamento) }}
+        <!-- Rodapé com informações -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-50">
+          <div class="text-xs text-gray-400">
+            Criado em {{ new Date(evento.dataCriacao).toLocaleDateString('pt-BR') }}
+            <span v-if="evento.dataArquivamento" class="ml-2">
+              • Arquivado em {{ new Date(evento.dataArquivamento).toLocaleDateString('pt-BR') }}
             </span>
+          </div>
+          
+          <!-- Status do evento -->
+          <div class="text-xs text-gray-500">
+            {{ getStatusEvento(evento) }}
           </div>
         </div>
       </div>
@@ -164,8 +141,6 @@
 </template>
 
 <script setup lang="ts">
-import { format, formatDistance } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 import type { Evento } from '@/stores/eventos'
 
 const props = defineProps<{
@@ -175,38 +150,40 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'editar', evento: Evento): void
   (e: 'excluir', id: string): void
-  (e: 'concluir', id: string, concluido: boolean): void
-  (e: 'arquivar', id: string): void
-  (e: 'desarquivar', id: string): void
+  (e: 'marcar-concluido', id: string, concluido: boolean): void
 }>()
 
-function formatarData(data: Date): string {
-  return format(new Date(data), 'dd/MM/yyyy', { locale: ptBR })
+const prioridadeLabel: Record<string, string> = {
+  'baixa': 'Baixa',
+  'media': 'Média',
+  'alta': 'Alta'
 }
 
 function formatarDataHora(data: Date): string {
-  return format(new Date(data), 'dd/MM/yyyy HH:mm', { locale: ptBR })
+  return new Date(data).toLocaleString('pt-BR', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
 }
 
-function calcularDuracao(inicio: Date, fim: Date): string {
-  return formatDistance(new Date(fim), new Date(inicio), { locale: ptBR })
-}
-
-function getPrioridadeColor(prioridade: string): string {
-  switch (prioridade) {
-    case 'alta':
-      return 'bg-red-500'
-    case 'media':
-      return 'bg-amber-500'
-    case 'baixa':
-      return 'bg-green-500'
-    default:
-      return 'bg-gray-500'
+function getStatusEvento(evento: Evento): string {
+  const agora = new Date()
+  const inicio = new Date(evento.dataInicio)
+  const fim = new Date(evento.dataFim)
+  
+  if (evento.concluido) {
+    return 'Concluído'
+  } else if (fim < agora) {
+    return 'Expirado'
+  } else if (inicio <= agora && agora <= fim) {
+    return 'Em andamento'
+  } else if (inicio > agora) {
+    return 'Agendado'
   }
-}
-
-function handleConcluidoChange(id: string, event: Event) {
-  const target = event.target as HTMLInputElement
-  emit('concluir', id, target.checked)
+  
+  return ''
 }
 </script> 

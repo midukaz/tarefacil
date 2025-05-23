@@ -1,174 +1,148 @@
 <template>
-  <div class="space-y-4">
+  <div class="space-y-3">
     <!-- Lista de Rotinas -->
-    <div class="space-y-4">
+    <div class="space-y-3">
       <div
         v-for="rotina in rotinas"
         :key="rotina.id"
-        class="bg-white shadow-sm rounded-lg overflow-hidden"
-        :class="{'opacity-90': rotinaFinalizadaHoje(rotina)}"
+        class="group bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md hover:border-gray-200 transition-all duration-200"
       >
-        <div class="px-4 py-5 sm:p-6">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <div class="flex items-center gap-2 mb-3 sm:mb-0">
-              <div
-                class="w-3 h-3 rounded-full"
-                :class="rotina.ativa ? 'bg-amber-500' : 'bg-gray-300'"
-              ></div>
-              <h3 class="text-lg font-medium text-gray-900">{{ rotina.titulo }}</h3>
-              <span v-if="rotinaFinalizadaHoje(rotina)" class="text-xs px-2 py-0.5 bg-green-100 text-green-800 rounded-full">
-                Finalizada hoje
-              </span>
-            </div>
-
-            <div class="flex flex-wrap gap-2">
-              <button
-                @click="abrirModalFinalizarRotina(rotina)"
-                class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
-                :class="rotinaFinalizadaHoje(rotina) 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-green-50 text-green-700 hover:bg-green-100'"
-                :disabled="rotinaFinalizadaHoje(rotina)"
-              >
-                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                Finalizar
-              </button>
-              
-              <button
-                @click="$emit('editar', rotina)"
-                class="inline-flex items-center rounded-md border border-gray-300 px-3 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2"
-                :class="rotinaFinalizadaHoje(rotina) 
-                  ? 'bg-gray-100 text-gray-400 cursor-not-allowed' 
-                  : 'bg-white text-gray-700 hover:bg-gray-50'"
-                :disabled="rotinaFinalizadaHoje(rotina)"
-              >
-                Editar
-              </button>
-              <button
-                @click="$emit('excluir', rotina.id)"
-                class="inline-flex items-center rounded-md border px-3 py-2 text-sm font-medium shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 bg-red-600 text-white hover:bg-red-700 border-transparent"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-
-          <p class="mt-2 text-sm text-gray-500">{{ rotina.descricao }}</p>
-
-          <!-- Detalhes da rotina -->
-          <div class="mt-3 flex flex-wrap items-center gap-4 text-sm text-gray-500">
-            <div class="flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{{ rotina.horario }}</span>
-            </div>
-            
-            <div class="flex items-center gap-1">
-              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <span>{{ formatarDiasSemana(rotina.diasSemana) }}</span>
-            </div>
-          </div>
-
-          <!-- Tarefas da rotina -->
-          <div v-if="rotina.tarefas.length > 0" class="mt-4">
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Tarefas</h4>
-            <ul class="space-y-1">
-              <li
-                v-for="tarefa in rotina.tarefas"
-                :key="tarefa.id"
-                class="flex items-center gap-2 text-sm"
-              >
-                <input
-                  type="checkbox"
-                  :checked="tarefa.concluida"
-                  @change="handleTarefaChange(rotina.id, tarefa.id, $event)"
-                  class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-                  :disabled="rotinaFinalizadaHoje(rotina)"
-                  :class="{'opacity-60 cursor-not-allowed': rotinaFinalizadaHoje(rotina)}"
-                />
+        <!-- Cabeçalho da rotina -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center gap-3 mb-2">
+              <h3 class="text-lg font-medium text-gray-900 truncate">{{ rotina.titulo }}</h3>
+              <div class="flex gap-1.5">
+                <!-- Status ativo/inativo -->
                 <span
                   :class="{
-                    'text-gray-500 line-through': tarefa.concluida,
-                    'text-gray-700': !tarefa.concluida
+                    'bg-green-50 text-green-700 border-green-200': rotina.ativa,
+                    'bg-gray-50 text-gray-600 border-gray-200': !rotina.ativa
                   }"
+                  class="px-2 py-1 text-xs font-medium rounded-md border"
                 >
-                  {{ tarefa.titulo }}
+                  {{ rotina.ativa ? 'Ativa' : 'Inativa' }}
                 </span>
-              </li>
-            </ul>
+                <!-- Horário -->
+                <span class="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+                  {{ rotina.horario }}
+                </span>
+              </div>
+            </div>
+            <p v-if="rotina.descricao" class="text-sm text-gray-600 leading-relaxed mb-3">{{ rotina.descricao }}</p>
+            
+            <!-- Dias da semana -->
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="dia in rotina.diasSemana"
+                :key="dia"
+                class="px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-md"
+              >
+                {{ diasSemanaLabel[dia] }}
+              </span>
+            </div>
           </div>
 
-          <!-- Data de criação e última execução -->
-          <div class="mt-4 text-xs text-gray-400">
-            Criada em: {{ formatarData(rotina.dataCriacao) }}
-            <span v-if="rotina.ultimaExecucao">
-              | Última execução: {{ formatarData(rotina.ultimaExecucao) }}
+          <!-- Menu de ações -->
+          <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+            <button
+              @click="$emit('toggle-ativa', rotina.id, !rotina.ativa)"
+              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              :title="rotina.ativa ? 'Desativar rotina' : 'Ativar rotina'"
+            >
+              <svg v-if="rotina.ativa" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M15 14h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+            <button
+              v-if="rotina.ativa"
+              @click="$emit('executar', rotina.id)"
+              class="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+              title="Executar rotina"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+            </button>
+            <button
+              @click="$emit('editar', rotina)"
+              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              title="Editar rotina"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+            </button>
+            <button
+              @click="$emit('excluir', rotina.id)"
+              class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              title="Excluir rotina"
+            >
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Tarefas da rotina -->
+        <div v-if="rotina.tarefas.length > 0" class="mb-4">
+          <h4 class="text-sm font-medium text-gray-700 mb-3">Tarefas</h4>
+          <div class="space-y-2">
+            <label
+              v-for="tarefa in rotina.tarefas"
+              :key="tarefa.id"
+              class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+            >
+              <input
+                type="checkbox"
+                :checked="tarefa.concluida"
+                @change="handleTarefaChange(rotina.id, tarefa.id, $event)"
+                class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-200 focus:ring-2"
+              />
+              <span
+                :class="{
+                  'text-gray-500 line-through': tarefa.concluida,
+                  'text-gray-700': !tarefa.concluida
+                }"
+                class="text-sm flex-1"
+              >
+                {{ tarefa.titulo }}
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Rodapé com informações -->
+        <div class="flex items-center justify-between pt-4 border-t border-gray-50">
+          <div class="text-xs text-gray-400">
+            Criada em {{ new Date(rotina.dataCriacao).toLocaleDateString('pt-BR') }}
+            <span v-if="rotina.ultimaExecucao" class="ml-2">
+              • Última execução em {{ new Date(rotina.ultimaExecucao).toLocaleDateString('pt-BR') }}
             </span>
+          </div>
+          
+          <!-- Indicador de progresso das tarefas -->
+          <div v-if="rotina.tarefas.length > 0" class="flex items-center gap-2 text-xs text-gray-500">
+            <span>{{ tarefasConcluidas(rotina) }}/{{ rotina.tarefas.length }}</span>
+            <div class="w-12 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+              <div 
+                class="h-full bg-gray-400 rounded-full transition-all duration-300"
+                :style="{ width: `${progressoTarefas(rotina)}%` }"
+              ></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-    
-    <!-- Modal para finalizar rotina -->
-    <transition 
-      enter-active-class="transition duration-200 ease-out" 
-      enter-from-class="opacity-0" 
-      enter-to-class="opacity-100" 
-      leave-active-class="transition duration-150 ease-in" 
-      leave-from-class="opacity-100" 
-      leave-to-class="opacity-0"
-    >
-      <div
-        v-if="mostrarModalFinalizar"
-        class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
-        @click.self="fecharModalFinalizar"
-      >
-        <div 
-          class="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all p-6"
-          :class="{ 'opacity-100 scale-100': mostrarModalFinalizar, 'opacity-0 scale-95': !mostrarModalFinalizar }"
-        >
-          <h2 class="text-lg font-semibold text-gray-900 mb-2">Finalizar Rotina</h2>
-          <p class="text-gray-600 mb-4">
-            Deseja finalizar a rotina "{{ rotinaSelecionada?.titulo }}"? Isso marcará todas as tarefas como concluídas e registrará a execução da rotina.
-          </p>
-          
-          <div v-if="rotinaSelecionada?.tarefas.length" class="mb-4 bg-amber-50 p-3 rounded-md">
-            <h3 class="text-sm font-medium text-amber-800 mb-2">Tarefas da rotina:</h3>
-            <ul class="space-y-1 ml-2">
-              <li v-for="tarefa in rotinaSelecionada?.tarefas" :key="tarefa.id" class="text-sm text-amber-700">
-                • {{ tarefa.titulo }}
-              </li>
-            </ul>
-          </div>
-          
-          <div class="flex justify-end space-x-3">
-            <button 
-              @click="fecharModalFinalizar" 
-              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-            >
-              Cancelar
-            </button>
-            <button 
-              @click="finalizarRotina"
-              class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-            >
-              Finalizar
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import type { Rotina, DiaSemana } from '@/stores/rotinas'
+import type { Rotina } from '@/stores/rotinas'
 
 const props = defineProps<{
   rotinas: Rotina[]
@@ -178,76 +152,31 @@ const emit = defineEmits<{
   (e: 'editar', rotina: Rotina): void
   (e: 'excluir', id: string): void
   (e: 'atualizar-tarefa', rotinaId: string, tarefaId: string, concluida: boolean): void
-  (e: 'finalizar-rotina', rotinaId: string): void
+  (e: 'toggle-ativa', id: string, ativa: boolean): void
+  (e: 'executar', id: string): void
 }>()
 
-// Estado para o modal de finalizar rotina
-const mostrarModalFinalizar = ref(false)
-const rotinaSelecionada = ref<Rotina | null>(null)
-
-function abrirModalFinalizarRotina(rotina: Rotina) {
-  if (rotinaFinalizadaHoje(rotina)) return;
-  
-  rotinaSelecionada.value = rotina
-  mostrarModalFinalizar.value = true
-}
-
-function fecharModalFinalizar() {
-  mostrarModalFinalizar.value = false
-  setTimeout(() => {
-    rotinaSelecionada.value = null
-  }, 200)
-}
-
-function finalizarRotina() {
-  if (rotinaSelecionada.value) {
-    emit('finalizar-rotina', rotinaSelecionada.value.id)
-    fecharModalFinalizar()
-  }
-}
-
-// Verificar se a rotina já foi finalizada hoje
-function rotinaFinalizadaHoje(rotina: Rotina): boolean {
-  if (!rotina.ultimaExecucao) return false;
-  
-  const hoje = new Date();
-  const ultimaExecucao = new Date(rotina.ultimaExecucao);
-  
-  return (
-    hoje.getDate() === ultimaExecucao.getDate() &&
-    hoje.getMonth() === ultimaExecucao.getMonth() &&
-    hoje.getFullYear() === ultimaExecucao.getFullYear()
-  );
-}
-
-function formatarDiasSemana(dias: DiaSemana[]): string {
-  if (dias.length === 7) return 'Todos os dias'
-  
-  const nomesDias: Record<DiaSemana, string> = {
-    segunda: 'Seg',
-    terca: 'Ter',
-    quarta: 'Qua',
-    quinta: 'Qui',
-    sexta: 'Sex',
-    sabado: 'Sáb',
-    domingo: 'Dom'
-  }
-  
-  return dias.map(dia => nomesDias[dia]).join(', ')
-}
-
-function formatarData(data: Date): string {
-  return new Date(data).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: '2-digit',
-    year: 'numeric'
-  })
+const diasSemanaLabel: Record<string, string> = {
+  'segunda': 'Seg',
+  'terca': 'Ter', 
+  'quarta': 'Qua',
+  'quinta': 'Qui',
+  'sexta': 'Sex',
+  'sabado': 'Sáb',
+  'domingo': 'Dom'
 }
 
 function handleTarefaChange(rotinaId: string, tarefaId: string, event: Event) {
-  if (rotinaFinalizadaHoje(props.rotinas.find(r => r.id === rotinaId)!)) return;
-  
-  const target = event.target as HTMLInputElement
-  emit('atualizar-tarefa', rotinaId, tarefaId, target.checked)
+  const target = event.target as HTMLInputElement;
+  emit('atualizar-tarefa', rotinaId, tarefaId, target.checked);
+}
+
+function tarefasConcluidas(rotina: Rotina): number {
+  return rotina.tarefas.filter(t => t.concluida).length;
+}
+
+function progressoTarefas(rotina: Rotina): number {
+  if (rotina.tarefas.length === 0) return 0;
+  return (tarefasConcluidas(rotina) / rotina.tarefas.length) * 100;
 }
 </script> 

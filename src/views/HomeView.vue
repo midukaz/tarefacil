@@ -1,445 +1,498 @@
 <template>
-  <div class="max-w-5xl mx-auto w-full p-4 py-6">
-    <!-- Alerta de lembretes importantes -->
-    <div v-if="showAlert && alertItems.length > 0" class="mb-6 bg-yellow-50 border border-yellow-200 rounded-lg overflow-hidden shadow-sm">
-      <div class="px-4 py-3 bg-yellow-100 border-b border-yellow-200 flex items-center justify-between">
-        <h2 class="font-semibold text-yellow-800 flex items-center">
-          <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
-          </svg>
-          Lembretes Importantes
-        </h2>
-        <button @click="closeAlert" class="text-yellow-800 hover:text-yellow-900">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+  <div class="min-h-screen bg-gray-50">
+    <div class="max-w-4xl mx-auto px-4 py-6">
+      <!-- Cabeçalho minimalista -->
+      <div class="mb-8">
+        <div class="text-center mb-6">
+          <h1 class="text-2xl md:text-3xl font-light text-gray-900 mb-1">
+            {{ getCurrentGreeting() }}
+          </h1>
+          <p class="text-gray-500 text-sm">
+            {{ format(new Date(), "EEEE, dd 'de' MMMM", { locale: ptBR }) }}
+          </p>
+        </div>
+
+        <!-- Resumo do dia -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <!-- Card Tarefas -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                  </svg>
+                </div>
+                <h3 class="font-medium text-gray-900 text-sm">Tarefas</h3>
+              </div>
+              <router-link to="/tarefas" 
+                class="text-blue-600 hover:text-blue-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </router-link>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Hoje</span>
+                <span class="text-lg font-light text-gray-900">{{ tarefasStore.tarefasHoje.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Atrasadas</span>
+                <span class="text-sm font-medium text-red-600">{{ tarefasStore.tarefasAtrasadas.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Total</span>
+                <span class="text-sm text-gray-600">{{ tarefasStore.tarefas.length }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Eventos -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 class="font-medium text-gray-900 text-sm">Eventos</h3>
+              </div>
+              <router-link to="/eventos" 
+                class="text-purple-600 hover:text-purple-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </router-link>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Hoje</span>
+                <span class="text-lg font-light text-gray-900">{{ eventosStore.eventosHoje.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Próximos</span>
+                <span class="text-sm font-medium text-amber-600">{{ eventosStore.eventosProximos.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Total</span>
+                <span class="text-sm text-gray-600">{{ eventosStore.eventos.length }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card Rotinas -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-4 hover:shadow-md transition-shadow duration-200">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                  <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <h3 class="font-medium text-gray-900 text-sm">Rotinas</h3>
+              </div>
+              <router-link to="/rotinas" 
+                class="text-green-600 hover:text-green-700 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+              </router-link>
+            </div>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Hoje</span>
+                <span class="text-lg font-light text-gray-900">{{ rotinasStore.rotinasHoje.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Ativas</span>
+                <span class="text-sm font-medium text-green-600">{{ rotinasAtivas.length }}</span>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-xs text-gray-500">Total</span>
+                <span class="text-sm text-gray-600">{{ rotinasStore.rotinas.length }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      
-      <div class="p-4">
-        <ul class="divide-y divide-yellow-100">
-          <li v-for="(item, index) in alertItems.slice(0, 3)" :key="index" class="py-3 flex items-start">
-            <span class="h-5 w-5 mt-0.5 flex-shrink-0" :class="getAlertIconClass(item.type)">
-              <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" :d="getAlertIconPath(item.type)" />
-              </svg>
-            </span>
-            <div class="ml-3 flex-1">
-              <p class="text-sm font-medium text-gray-800">{{ item.titulo }}</p>
-              <p class="text-xs mt-0.5" :class="getAlertTextClass(item.type)">
-                {{ item.mensagem }}
-              </p>
-              
-            </div>
-            <div class="mt-2 flex gap-2">
-              <button 
-                v-if="item.tipo === 'tarefa'"
-                @click="marcarTarefaComoArquivada(item.item.id)" 
-                :class="getAlertTextClass(item.type)"
-                class="text-xs px-2 py-1 rounded flex items-center"
-              >
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                Arquivar
-              </button>
-              
-              <button 
-                v-if="item.tipo === 'evento'"
-                @click="marcarEventoComoArquivado(item.item.id)" 
-                class="text-xs px-2 py-1 text-gray-600 bg-gray-50 hover:bg-gray-100 rounded border border-gray-200 flex items-center"
-              >
-                <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                Arquivar
-              </button>
-            </div>
-          </li>
-        </ul>
-        
-        <div v-if="alertItems.length > 3" class="mt-3 text-center">
-          <button @click="showAllAlerts" class="text-sm text-yellow-700 hover:text-yellow-900 font-medium">
-            Ver todos os {{ alertItems.length }} lembretes
+
+      <!-- Navegação por tipo -->
+      <div class="mb-6">
+        <nav class="flex space-x-1 bg-white rounded-xl p-1 shadow-sm border border-gray-100">
+          <button
+            @click="abaAtiva = 'hoje'"
+            class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+            :class="abaAtiva === 'hoje' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'text-gray-500 hover:text-gray-700'"
+          >
+            Hoje
           </button>
-        </div>
+          <button
+            @click="abaAtiva = 'pendencias'"
+            class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+            :class="abaAtiva === 'pendencias' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'text-gray-500 hover:text-gray-700'"
+          >
+            Pendências
+            <span v-if="totalPendencias > 0" 
+              class="ml-2 text-xs px-1.5 py-0.5 bg-red-500 text-white rounded-full">
+              {{ totalPendencias }}
+            </span>
+          </button>
+          <button
+            @click="abaAtiva = 'visao'"
+            class="flex-1 py-2.5 px-4 rounded-lg text-sm font-medium transition-all duration-200"
+            :class="abaAtiva === 'visao' 
+              ? 'bg-gray-900 text-white shadow-sm' 
+              : 'text-gray-500 hover:text-gray-700'"
+          >
+            Visão geral
+          </button>
+        </nav>
       </div>
-    </div>
-    
-    <!-- Cabeçalho com resumo -->
-    <div class="mb-8">
-      <h1 class="text-2xl font-bold text-gray-900">Olá</h1>
-      <p class="text-gray-500 mt-1">Veja um resumo da sua produtividade hoje</p>
-      
-      <!-- Estatísticas Rápidas -->
-      <div class="grid grid-cols-3 gap-4 mt-6">
-        <div class="bg-indigo-50 rounded-lg p-4 flex flex-col items-center">
-          <span class="text-xl font-semibold text-indigo-700">{{ tarefasStore.tarefasHoje.length }}</span>
-          <span class="text-xs text-indigo-600 mt-1">Tarefas Hoje</span>
-        </div>
-        <div class="bg-rose-50 rounded-lg p-4 flex flex-col items-center">
-          <span class="text-xl font-semibold text-rose-700">{{ eventosStore.eventosHoje.length }}</span>
-          <span class="text-xs text-rose-600 mt-1">Eventos Hoje</span>
-        </div>
-        <div class="bg-amber-50 rounded-lg p-4 flex flex-col items-center">
-          <span class="text-xl font-semibold text-amber-700">{{ rotinasStore.rotinasHoje.length }}</span>
-          <span class="text-xs text-amber-600 mt-1">Rotinas Hoje</span>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Menu de navegação rápida -->
-    <div class="flex justify-end mb-6 border-b border-gray-100 pb-4">
-      
-      <!-- Dropdown de adicionar novo -->
-      <div class="relative" ref="addMenuRef">
-        <button 
-          @click="toggleAddMenu" 
-          class="flex items-center text-sm font-medium text-gray-600 hover:text-gray-900"
-        >
-          <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Adicionar</span>
-          <svg class="w-4 h-4 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-        
-        <div v-if="showAddMenu" class="absolute right-0 mt-2 py-2 w-48 bg-white rounded-md shadow-lg z-10 border border-gray-100">
-          <router-link to="/tarefas?new=true" class="block px-4 py-2 text-sm text-gray-700 hover:bg-indigo-50 hover:text-indigo-700">
-            Nova Tarefa
-          </router-link>
-          <router-link to="/eventos?new=true" class="block px-4 py-2 text-sm text-gray-700 hover:bg-rose-50 hover:text-rose-700">
-            Novo Evento
-          </router-link>
-          <router-link to="/rotinas?new=true" class="block px-4 py-2 text-sm text-gray-700 hover:bg-amber-50 hover:text-amber-700">
-            Nova Rotina
-          </router-link>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Conteúdo principal em duas colunas -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Coluna da esquerda: Tarefas e Rotinas -->
-      <div class="space-y-6">
-        <!-- Tarefas de hoje -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-          <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-              </svg>
-              Tarefas de Hoje
-            </h2>
-            <router-link to="/tarefas" class="text-xs text-indigo-600 hover:text-indigo-800 flex items-center">
-              Ver todas
-              <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </router-link>
-          </div>
-          <div class="p-4">
-            <div v-if="tarefasStore.tarefasHoje.length === 0" class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
-              <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              Nenhuma tarefa para hoje
+
+      <!-- Conteúdo das abas -->
+      <div class="transition-all duration-300">
+        <!-- Aba Hoje -->
+        <div v-if="abaAtiva === 'hoje'" class="space-y-6">
+          <!-- Tarefas de hoje -->
+          <div v-if="tarefasStore.tarefasHoje.length > 0" 
+            class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50">
+              <h3 class="font-medium text-gray-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+                </svg>
+                Tarefas de hoje ({{ tarefasStore.tarefasHoje.length }})
+              </h3>
             </div>
-            <ul v-else class="divide-y divide-gray-50">
-              <li v-for="tarefa in tarefasStore.tarefasHoje.slice(0, 4)" :key="tarefa.id" class="py-3">
-                <div class="flex items-start">
-                  <div class="flex-shrink-0 h-4 w-4 mt-1">
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="tarefa in tarefasStore.tarefasHoje.slice(0, 5)" :key="tarefa.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="$router.push(`/tarefas?focus=${tarefa.id}`)">
+                  <div class="flex-shrink-0">
                     <span :class="{
-                      'bg-green-100 border-green-400': tarefa.prioridade === 'baixa',
-                      'bg-yellow-100 border-yellow-400': tarefa.prioridade === 'media',
-                      'bg-red-100 border-red-400': tarefa.prioridade === 'alta'
-                    }" class="h-3 w-3 rounded-full border block"></span>
+                      'bg-gray-100 border-gray-300': tarefa.prioridade === 'baixa',
+                      'bg-amber-100 border-amber-300': tarefa.prioridade === 'media',
+                      'bg-red-100 border-red-300': tarefa.prioridade === 'alta'
+                    }" class="w-3 h-3 rounded-full border-2 block"></span>
                   </div>
-                  <div class="ml-2 flex-1">
-                    <p class="text-sm font-medium text-gray-800">{{ tarefa.titulo }}</p>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ statusFormatado(tarefa.status) }}</p>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ tarefa.titulo }}</p>
+                    <p class="text-xs text-gray-500">{{ statusFormatado(tarefa.status) }}</p>
                   </div>
-                </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-        
-        <!-- Rotinas de hoje -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-          <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Rotinas de Hoje
-            </h2>
-            <router-link to="/rotinas" class="text-xs text-amber-600 hover:text-amber-800 flex items-center">
-              Ver todas
-              <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </router-link>
-          </div>
-          <div class="p-4">
-            <div v-if="rotinasStore.rotinasHoje.length === 0" class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
-              <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              Nenhuma rotina para hoje
-            </div>
-            <ul v-else class="divide-y divide-gray-50">
-              <li v-for="rotina in rotinasStore.rotinasHoje.slice(0, 4)" :key="rotina.id" class="py-3">
-                <div class="flex items-start">
-                  <div class="ml-2 flex-1">
-                    <div class="flex justify-between">
-                      <p class="text-sm font-medium text-gray-800">{{ rotina.titulo }}</p>
-                      <p class="text-xs px-2 py-0.5 bg-amber-50 text-amber-800 rounded-full">{{ rotina.horario }}</p>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-0.5 line-clamp-1">{{ rotina.descricao }}</p>
+                  <div class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
                   </div>
                 </div>
-              </li>
-            </ul>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Coluna da direita: Eventos e alertas -->
-      <div class="space-y-6">
-        <!-- Eventos de hoje -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-          <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Eventos de Hoje
-            </h2>
-            <router-link to="/eventos" class="text-xs text-rose-600 hover:text-rose-800 flex items-center">
-              Ver todos
-              <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-              </svg>
-            </router-link>
-          </div>
-          <div class="p-4">
-            <div v-if="eventosStore.eventosHoje.length === 0" class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
-              <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              Nenhum evento para hoje
+              </div>
+              <div v-if="tarefasStore.tarefasHoje.length > 5" class="mt-4 text-center">
+                <router-link to="/tarefas" 
+                  class="text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                  Ver todas as {{ tarefasStore.tarefasHoje.length }} tarefas
+                </router-link>
+              </div>
             </div>
-            <ul v-else class="divide-y divide-gray-50">
-              <li v-for="evento in eventosStore.eventosHoje.slice(0, 4)" :key="evento.id" class="py-3">
-                <div class="flex items-start">
-                  <div class="ml-2 flex-1">
-                    <div class="flex justify-between">
-                      <p class="text-sm font-medium text-gray-800">{{ evento.titulo }}</p>
-                      <p class="text-xs px-2 py-0.5 bg-rose-50 text-rose-800 rounded-full">{{ formatarHora(evento.dataInicio) }}</p>
-                    </div>
-                    <p class="text-xs text-gray-500 mt-0.5">{{ evento.local }}</p>
-                  </div>
-                </div>
-              </li>
-            </ul>
           </div>
-        </div>
-        
-        <!-- Alertas (combinação de tarefas atrasadas e eventos próximos) -->
-        <div class="bg-white rounded-lg shadow-sm overflow-hidden border border-gray-100">
-          <div class="px-4 py-3 bg-white border-b border-gray-100 flex items-center justify-between">
-            <h2 class="font-semibold text-gray-900 flex items-center">
-              <svg class="w-4 h-4 mr-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-              </svg>
-              Alertas e Lembretes
-            </h2>
-          </div>
-          <div class="p-4">
-            <!-- Tarefas atrasadas -->
-            <div v-if="tarefasStore.tarefasAtrasadas.length > 0">
-              <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Tarefas Atrasadas</h3>
-              <ul class="mb-4 divide-y divide-gray-50">
-                <li v-for="tarefa in tarefasStore.tarefasAtrasadas.slice(0, 2)" :key="tarefa.id" class="py-2">
-                  <div class="flex items-start">
-                    <span class="h-4 w-4 mt-0.5 flex-shrink-0 text-red-500">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                    </span>
-                    <div class="ml-2 flex-1">
-                      <p class="text-sm font-medium text-gray-800">{{ tarefa.titulo }}</p>
-                      <p class="text-xs text-red-600 mt-0.5" v-if="tarefa.dataVencimento">
-                        Venceu em {{ formatarData(tarefa.dataVencimento) }}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              </ul>
+
+          <!-- Eventos de hoje -->
+          <div v-if="eventosStore.eventosHoje.length > 0" 
+            class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50">
+              <h3 class="font-medium text-gray-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Eventos de hoje ({{ eventosStore.eventosHoje.length }})
+              </h3>
             </div>
-            
-            <!-- Próximos eventos -->
-            <div v-if="eventosStore.eventosProximos.length > 0">
-              <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Próximos Eventos</h3>
-              <ul class="mb-4 divide-y divide-gray-50">
-                <li v-for="evento in eventosStore.eventosProximos.slice(0, 2)" :key="evento.id" class="py-2">
-                  <div class="flex items-start">
-                    <span class="h-4 w-4 mt-0.5 flex-shrink-0 text-blue-500">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </span>
-                    <div class="ml-2 flex-1">
-                      <p class="text-sm font-medium text-gray-800">{{ evento.titulo }}</p>
-                      <p class="text-xs text-blue-600 mt-0.5" v-if="evento.dataInicio">
-                        {{ formatarData(evento.dataInicio) }}
-                      </p>
-                    </div>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            
-            <!-- Tarefas próximas -->
-            <div v-if="tarefasStore.tarefasProximas.length > 0">
-              <h3 class="text-xs uppercase text-gray-500 font-semibold mb-2">Tarefas Próximas</h3>
-              <ul class="divide-y divide-gray-50">
-                <li v-for="tarefa in tarefasStore.tarefasProximas.slice(0, 2)" :key="tarefa.id" class="py-2">
-                  <div class="flex items-start">
-                    <span class="h-4 w-4 mt-0.5 flex-shrink-0 text-indigo-500">
-                      <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="evento in eventosStore.eventosHoje.slice(0, 5)" :key="evento.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="$router.push(`/eventos?focus=${evento.id}`)">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-purple-50 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                       </svg>
-                    </span>
-                    <div class="ml-2 flex-1">
-                      <p class="text-sm font-medium text-gray-800">{{ tarefa.titulo }}</p>
-                      <p class="text-xs text-indigo-600 mt-0.5" v-if="tarefa.dataVencimento">
-                        Vence em {{ formatarData(tarefa.dataVencimento) }}
-                      </p>
                     </div>
                   </div>
-                </li>
-              </ul>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ evento.titulo }}</p>
+                    <p class="text-xs text-gray-500">{{ formatarHora(evento.dataInicio) }} • {{ evento.local }}</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div v-if="eventosStore.eventosHoje.length > 5" class="mt-4 text-center">
+                <router-link to="/eventos" 
+                  class="text-sm text-purple-600 hover:text-purple-700 font-medium transition-colors">
+                  Ver todos os {{ eventosStore.eventosHoje.length }} eventos
+                </router-link>
+              </div>
             </div>
-            
-            <!-- Sem alertas -->
-            <div v-if="tarefasStore.tarefasAtrasadas.length === 0 && 
-                      eventosStore.eventosProximos.length === 0 && 
-                      tarefasStore.tarefasProximas.length === 0" 
-                class="text-center py-6 text-gray-400 text-sm flex flex-col items-center">
-              <svg class="w-10 h-10 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M5 13l4 4L19 7" />
+          </div>
+
+          <!-- Rotinas de hoje -->
+          <div v-if="rotinasStore.rotinasHoje.length > 0" 
+            class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50">
+              <h3 class="font-medium text-gray-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Rotinas de hoje ({{ rotinasStore.rotinasHoje.length }})
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="rotina in rotinasStore.rotinasHoje.slice(0, 5)" :key="rotina.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+                  @click="$router.push(`/rotinas?focus=${rotina.id}`)">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-green-50 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ rotina.titulo }}</p>
+                    <p class="text-xs text-gray-500">{{ rotina.horario }} • {{ rotina.tarefas.length }} tarefas</p>
+                  </div>
+                  <div class="flex-shrink-0">
+                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              <div v-if="rotinasStore.rotinasHoje.length > 5" class="mt-4 text-center">
+                <router-link to="/rotinas" 
+                  class="text-sm text-green-600 hover:text-green-700 font-medium transition-colors">
+                  Ver todas as {{ rotinasStore.rotinasHoje.length }} rotinas
+                </router-link>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado vazio -->
+          <div v-if="tarefasStore.tarefasHoje.length === 0 && 
+                     eventosStore.eventosHoje.length === 0 && 
+                     rotinasStore.rotinasHoje.length === 0" 
+               class="text-center py-16">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 3v18m0 0l-8.5-8.5M12 21l8.5-8.5" />
               </svg>
-              Tudo em dia! Nenhum alerta pendente.
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Nada programado para hoje</h3>
+            <p class="text-sm text-gray-500 mb-6">Use a navegação para acessar suas tarefas, eventos ou rotinas.</p>
+          </div>
+        </div>
+
+        <!-- Aba Pendências -->
+        <div v-if="abaAtiva === 'pendencias'" class="space-y-6">
+          <!-- Tarefas atrasadas -->
+          <div v-if="tarefasStore.tarefasAtrasadas.length > 0" 
+            class="bg-white rounded-xl border border-red-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-red-50 border-b border-red-100">
+              <h3 class="font-medium text-red-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tarefas atrasadas ({{ tarefasStore.tarefasAtrasadas.length }})
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="tarefa in tarefasStore.tarefasAtrasadas.slice(0, 5)" :key="tarefa.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-red-25 transition-colors cursor-pointer"
+                  @click="$router.push(`/tarefas?focus=${tarefa.id}`)">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ tarefa.titulo }}</p>
+                    <p class="text-xs text-red-600" v-if="tarefa.dataVencimento">
+                      Venceu em {{ formatarData(tarefa.dataVencimento) }}
+                    </p>
+                  </div>
+                  <div class="flex gap-2">
+                    <button @click.stop="marcarTarefaComoArquivada(tarefa.id)"
+                      class="text-xs px-2 py-1 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-md transition-colors">
+                      Arquivar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Próximos eventos -->
+          <div v-if="eventosStore.eventosProximos.length > 0" 
+            class="bg-white rounded-xl border border-blue-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-blue-50 border-b border-blue-100">
+              <h3 class="font-medium text-blue-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Próximos eventos ({{ eventosStore.eventosProximos.length }})
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="evento in eventosStore.eventosProximos.slice(0, 5)" :key="evento.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-25 transition-colors cursor-pointer"
+                  @click="$router.push(`/eventos?focus=${evento.id}`)">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ evento.titulo }}</p>
+                    <p class="text-xs text-blue-600" v-if="evento.dataInicio">
+                      {{ formatarData(evento.dataInicio) }} às {{ formatarHora(evento.dataInicio) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tarefas próximas -->
+          <div v-if="tarefasStore.tarefasProximas.length > 0" 
+            class="bg-white rounded-xl border border-amber-200 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 bg-amber-50 border-b border-amber-100">
+              <h3 class="font-medium text-amber-900 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Tarefas próximas ({{ tarefasStore.tarefasProximas.length }})
+              </h3>
+            </div>
+            <div class="p-6">
+              <div class="space-y-3">
+                <div v-for="tarefa in tarefasStore.tarefasProximas.slice(0, 5)" :key="tarefa.id" 
+                  class="flex items-center gap-3 p-3 rounded-lg hover:bg-amber-25 transition-colors cursor-pointer"
+                  @click="$router.push(`/tarefas?focus=${tarefa.id}`)">
+                  <div class="flex-shrink-0">
+                    <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
+                      <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium text-gray-900 truncate">{{ tarefa.titulo }}</p>
+                    <p class="text-xs text-amber-600" v-if="tarefa.dataVencimento">
+                      Vence em {{ formatarData(tarefa.dataVencimento) }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Estado sem pendências -->
+          <div v-if="totalPendencias === 0" class="text-center py-16">
+            <div class="inline-flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
+              <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Tudo em dia!</h3>
+            <p class="text-sm text-gray-500">Não há pendências ou alertas no momento.</p>
+          </div>
+        </div>
+
+        <!-- Aba Visão Geral -->
+        <div v-if="abaAtiva === 'visao'" class="space-y-6">
+          <!-- Estatísticas gerais -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Progressão mensal -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 class="font-medium text-gray-900 mb-4">Progresso este mês</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Tarefas concluídas</span>
+                  <span class="text-lg font-light text-blue-600">{{ tarefasConcluidas }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Eventos participados</span>
+                  <span class="text-lg font-light text-purple-600">{{ eventosConcluidos }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Rotinas executadas</span>
+                  <span class="text-lg font-light text-green-600">{{ rotinasExecutadas }}</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Produtividade -->
+            <div class="bg-white rounded-xl border border-gray-100 shadow-sm p-6">
+              <h3 class="font-medium text-gray-900 mb-4">Produtividade</h3>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Taxa de conclusão</span>
+                  <span class="text-lg font-light text-gray-900">{{ taxaConclusao }}%</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Média diária</span>
+                  <span class="text-lg font-light text-gray-900">{{ mediaDiaria }}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-sm text-gray-600">Sequência atual</span>
+                  <span class="text-lg font-light text-gray-900">{{ sequenciaAtual }} dias</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Atividade recente -->
+          <div class="bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden">
+            <div class="px-6 py-4 border-b border-gray-50">
+              <h3 class="font-medium text-gray-900">Atividade recente</h3>
+            </div>
+            <div class="p-6">
+              <div class="text-center py-8 text-gray-400 text-sm">
+                <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p>Histórico de atividades em breve</p>
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-  
-  <!-- Modal para finalizar rotina do dia -->
-  <transition 
-    enter-active-class="transition duration-200 ease-out" 
-    enter-from-class="opacity-0" 
-    enter-to-class="opacity-100" 
-    leave-active-class="transition duration-150 ease-in" 
-    leave-from-class="opacity-100" 
-    leave-to-class="opacity-0"
-  >
-    <div
-      v-if="mostrarModalFinalizarRotina"
-      class="fixed inset-0 z-50 bg-black/30 backdrop-blur-sm flex items-center justify-center p-4"
-      @click.self="fecharModalFinalizarRotina"
-    >
-      <div 
-        class="bg-white rounded-lg shadow-xl max-w-md w-full transform transition-all p-6"
-        :class="{ 'opacity-100 scale-100': mostrarModalFinalizarRotina, 'opacity-0 scale-95': !mostrarModalFinalizarRotina }"
-      >
-        <h2 class="text-lg font-semibold text-gray-900 mb-2">Finalizar Rotina do Dia</h2>
-        <p class="text-gray-600 mb-4">
-          Esta ação vai marcar como concluídos e/ou arquivar os seguintes itens:
-        </p>
-        
-        <div class="mb-4 space-y-4">
-          <div v-if="tarefasStore.tarefasHoje.length > 0" class="bg-indigo-50 p-3 rounded-md">
-            <div class="flex items-center mb-2">
-              <input 
-                type="checkbox" 
-                id="marcarTarefas" 
-                v-model="finalizarTarefas"
-                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
-              />
-              <label for="marcarTarefas" class="ml-2 text-sm font-medium text-gray-700">
-                {{ tarefasStore.tarefasHoje.length }} tarefas de hoje
-              </label>
-            </div>
-            <p class="text-xs text-gray-500 ml-6">As tarefas serão marcadas como concluídas</p>
-          </div>
-          
-          <div v-if="eventosStore.eventosHoje.length > 0" class="bg-rose-50 p-3 rounded-md">
-            <div class="flex items-center mb-2">
-              <input 
-                type="checkbox" 
-                id="marcarEventos" 
-                v-model="finalizarEventos"
-                class="h-4 w-4 rounded border-gray-300 text-rose-600 focus:ring-rose-500"
-              />
-              <label for="marcarEventos" class="ml-2 text-sm font-medium text-gray-700">
-                {{ eventosStore.eventosHoje.length }} eventos de hoje
-              </label>
-            </div>
-            <p class="text-xs text-gray-500 ml-6">Os eventos serão marcados como concluídos</p>
-          </div>
-          
-          <div v-if="tarefasStore.tarefasAtrasadas.length > 0" class="bg-amber-50 p-3 rounded-md">
-            <div class="flex items-center mb-2">
-              <input 
-                type="checkbox" 
-                id="marcarAtrasadas" 
-                v-model="finalizarAtrasadas"
-                class="h-4 w-4 rounded border-gray-300 text-amber-600 focus:ring-amber-500"
-              />
-              <label for="marcarAtrasadas" class="ml-2 text-sm font-medium text-gray-700">
-                {{ tarefasStore.tarefasAtrasadas.length }} tarefas atrasadas
-              </label>
-            </div>
-            <p class="text-xs text-gray-500 ml-6">As tarefas atrasadas serão arquivadas</p>
-          </div>
-        </div>
-        
-        <div v-if="!tarefasStore.tarefasHoje.length && !eventosStore.eventosHoje.length && !tarefasStore.tarefasAtrasadas.length" class="mb-4 text-center py-4">
-          <p class="text-gray-500">Não há itens para finalizar hoje!</p>
-        </div>
-        
-        <div class="flex justify-end space-x-3">
-          <button 
-            @click="fecharModalFinalizarRotina" 
-            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
-          >
-            Cancelar
-          </button>
-          <button 
-            @click="finalizarRotinaDoDia"
-            class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700"
-            :disabled="!finalizarTarefas && !finalizarEventos && !finalizarAtrasadas"
-          >
-            Finalizar
-          </button>
-        </div>
-      </div>
-    </div>
-  </transition>
 </template>
 
 <script setup lang="ts">
 import { useTarefasStore } from '../stores/tarefas'
 import { useEventosStore } from '../stores/eventos'
 import { useRotinasStore } from '../stores/rotinas'
-import { onMounted, ref, onBeforeUnmount, computed } from 'vue'
+import { onMounted, ref, computed } from 'vue'
 import { format } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
 
@@ -447,150 +500,51 @@ const tarefasStore = useTarefasStore()
 const eventosStore = useEventosStore()
 const rotinasStore = useRotinasStore()
 
-// Estado para o alerta
-const showAlert = ref(true)
+// Estado das abas
+const abaAtiva = ref<'hoje' | 'pendencias' | 'visao'>('hoje')
 
-function closeAlert() {
-  showAlert.value = false
-}
+// Computed properties
+const rotinasAtivas = computed(() => rotinasStore.rotinas.filter(r => r.ativa))
 
-// Adicionar tipos para os alertas
-type AlertType = 'danger' | 'warning' | 'info' | 'success';
+const totalPendencias = computed(() => 
+  tarefasStore.tarefasAtrasadas.length + 
+  eventosStore.eventosProximos.length + 
+  tarefasStore.tarefasProximas.length
+)
 
-interface AlertItem {
-  tipo: 'tarefa' | 'evento' | 'rotina';
-  type: AlertType;
-  titulo: string;
-  mensagem: string;
-  item: any;
-}
+const tarefasConcluidas = computed(() => 
+  tarefasStore.tarefas.filter(t => t.status === 'concluida').length
+)
 
-// Items para o alerta
-const alertItems = computed<AlertItem[]>(() => {
-  const items: AlertItem[] = [];
-  
-  // Adicionar tarefas atrasadas
-  tarefasStore.tarefasAtrasadas.slice(0, 2).forEach(tarefa => {
-    if (tarefa.dataVencimento) {
-      items.push({
-        tipo: 'tarefa',
-        type: 'danger',
-        titulo: tarefa.titulo,
-        mensagem: `Tarefa atrasada! Venceu em ${formatarData(tarefa.dataVencimento)}`,
-        item: tarefa
-      });
-    }
-  });
-  
-  // Adicionar eventos de hoje
-  eventosStore.eventosHoje.slice(0, 2).forEach(evento => {
-    items.push({
-      tipo: 'evento',
-      type: 'info',
-      titulo: evento.titulo,
-      mensagem: `Evento hoje às ${formatarHora(evento.dataInicio)} em ${evento.local}`,
-      item: evento
-    });
-  });
-  
-  // Adicionar tarefas para hoje
-  tarefasStore.tarefasHoje.slice(0, 2).forEach(tarefa => {
-    items.push({
-      tipo: 'tarefa',
-      type: 'warning',
-      titulo: tarefa.titulo,
-      mensagem: `Tarefa para hoje - ${statusFormatado(tarefa.status)}`,
-      item: tarefa
-    });
-  });
-  
-  // Adicionar rotinas para hoje
-  rotinasStore.rotinasHoje.slice(0, 2).forEach(rotina => {
-    items.push({
-      tipo: 'rotina',
-      type: 'success',
-      titulo: rotina.titulo,
-      mensagem: `Rotina programada para ${rotina.horario}`,
-      item: rotina
-    });
-  });
-  
-  return items.sort((a, b) => {
-    // Prioridade: 1. Tarefas atrasadas, 2. Eventos de hoje, 3. Tarefas para hoje, 4. Rotinas
-    const prioridade = { danger: 0, info: 1, warning: 2, success: 3 }
-    return prioridade[a.type] - prioridade[b.type]
-  })
+const eventosConcluidos = computed(() => 
+  eventosStore.eventos.filter(e => e.concluido).length
+)
+
+const rotinasExecutadas = computed(() => 
+  rotinasStore.rotinas.filter(r => r.ultimaExecucao).length
+)
+
+const taxaConclusao = computed(() => {
+  const total = tarefasStore.tarefas.length
+  if (total === 0) return 0
+  return Math.round((tarefasConcluidas.value / total) * 100)
 })
 
-function showAllAlerts() {
-  // Aqui você poderia abrir um modal com todos os alertas ou navegar para uma página de alertas
-  // Por enquanto apenas mantém o alert aberto
-  showAlert.value = true
-}
+const mediaDiaria = computed(() => {
+  // Simulação - poderia calcular com base em dados reais
+  return Math.round(tarefasConcluidas.value / 30)
+})
 
-function getAlertIconClass(type: AlertType): string {
-  switch(type) {
-    case 'danger': return 'text-red-500';
-    case 'warning': return 'text-yellow-500';
-    case 'info': return 'text-blue-500';
-    case 'success': return 'text-green-500';
-    default: return 'text-gray-500';
-  }
-}
-
-function getAlertTextClass(type: AlertType): string {
-  switch(type) {
-    case 'danger': return 'text-red-600';
-    case 'warning': return 'text-yellow-600';
-    case 'info': return 'text-blue-600';
-    case 'success': return 'text-green-600';
-    default: return 'text-gray-600';
-  }
-}
-
-function getAlertIconPath(type: AlertType): string {
-  switch(type) {
-    case 'danger':
-      return 'M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-    case 'warning':
-      return 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z';
-    case 'info':
-      return 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z';
-    case 'success':
-      return 'M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z';
-    default:
-      return 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-  }
-}
-
-// Menu dropdown de adicionar
-const showAddMenu = ref(false)
-const addMenuRef = ref(null)
-
-function toggleAddMenu() {
-  showAddMenu.value = !showAddMenu.value
-}
-
-// Fechar menu quando clicar fora dele
-function handleClickOutside(event: MouseEvent) {
-  if (addMenuRef.value && !(addMenuRef.value as HTMLElement).contains(event.target as Node)) {
-    showAddMenu.value = false
-  }
-}
+const sequenciaAtual = computed(() => {
+  // Simulação - poderia calcular sequência real de dias produtivos
+  return Math.floor(Math.random() * 15) + 1
+})
 
 onMounted(() => {
   // Carregar dados de todas as stores
   tarefasStore.carregarDados()
   eventosStore.carregarDados()
   rotinasStore.carregarDados()
-  
-  // Adicionar listener para fechar o menu
-  document.addEventListener('click', handleClickOutside)
-})
-
-onBeforeUnmount(() => {
-  // Remover listener ao desmontar o componente
-  document.removeEventListener('click', handleClickOutside)
 })
 
 // Funções de formatação
@@ -615,57 +569,18 @@ function statusFormatado(status: string): string {
   }
 }
 
+function getCurrentGreeting(): string {
+  const hour = new Date().getHours()
+  if (hour < 12) {
+    return 'Bom dia!'
+  } else if (hour < 18) {
+    return 'Boa tarde!'
+  } else {
+    return 'Boa noite!'
+  }
+}
+
 function marcarTarefaComoArquivada(id: string) {
   tarefasStore.marcarComoArquivada(id, true);
-  // Atualiza a lista de alertas removendo o item arquivado
-  showAlert.value = alertItems.value.length > 0;
-}
-
-function marcarEventoComoArquivado(id: string) {
-  eventosStore.marcarComoArquivado(id, true);
-  // Atualiza a lista de alertas removendo o item arquivado
-  showAlert.value = alertItems.value.length > 0;
-}
-
-// Estado para o modal de finalizar rotina
-const mostrarModalFinalizarRotina = ref(false)
-const finalizarTarefas = ref(true)
-const finalizarEventos = ref(true)
-const finalizarAtrasadas = ref(true)
-
-function fecharModalFinalizarRotina() {
-  mostrarModalFinalizarRotina.value = false
-}
-
-function finalizarRotinaDoDia() {
-  // Marcar tarefas de hoje como concluídas
-  if (finalizarTarefas.value) {
-    tarefasStore.tarefasHoje.forEach(tarefa => {
-      tarefasStore.atualizarTarefa(tarefa.id, { 
-        status: 'concluida', 
-        dataConclusao: new Date() 
-      })
-    })
-  }
-  
-  // Marcar eventos de hoje como concluídos
-  if (finalizarEventos.value) {
-    eventosStore.eventosHoje.forEach(evento => {
-      eventosStore.marcarComoConcluido(evento.id, true)
-    })
-  }
-  
-  // Arquivar tarefas atrasadas
-  if (finalizarAtrasadas.value) {
-    tarefasStore.tarefasAtrasadas.forEach(tarefa => {
-      tarefasStore.marcarComoArquivada(tarefa.id, true)
-    })
-  }
-  
-  // Fechar o modal e mostrar mensagem de sucesso
-  fecharModalFinalizarRotina()
-  
-  // Opcional: poderia adicionar um toast ou notificação aqui
-  alert('Rotina do dia finalizada com sucesso!')
 }
 </script> 
