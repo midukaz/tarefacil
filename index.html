@@ -5,6 +5,25 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>TareFácil - Organize suas tarefas, eventos e rotinas</title>
+    
+    <!-- Script para carregar tema antes da renderização -->
+    <script>
+      (function() {
+        try {
+          const config = JSON.parse(localStorage.getItem('tarefacil-configuracoes') || '{}');
+          const isDark = config.temaEscuro || false;
+          
+          if (isDark) {
+            document.documentElement.classList.add('dark');
+          }
+        } catch (e) {
+          // Se houver erro, detectar preferência do sistema
+          if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+          }
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="app"></div>
