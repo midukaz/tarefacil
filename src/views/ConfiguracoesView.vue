@@ -53,21 +53,50 @@
           </div>
           <div class="p-6 space-y-6">
             <!-- Tema -->
-            <div class="flex items-center justify-between">
-              <div>
-                <h3 class="text-sm font-medium text-gray-900 dark:text-white">Tema escuro</h3>
-                <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Ativar modo escuro da interface</p>
+            <div>
+              <h3 class="text-sm font-medium text-gray-900 dark:text-white mb-3">Tema da interface</h3>
+              <p class="text-xs text-gray-500 dark:text-gray-400 mb-4">Escolha o tema que preferir para a interface</p>
+              
+              <div class="space-y-3">
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    :value="'light'"
+                    v-model="configuracoes.temaMode"
+                    class="w-4 h-4 text-gray-900 dark:text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-200 dark:focus:ring-indigo-500 dark:bg-gray-700"
+                  />
+                  <div class="ml-3">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Tema claro</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Interface sempre em modo claro</p>
+                  </div>
+                </label>
+                
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    :value="'dark'"
+                    v-model="configuracoes.temaMode"
+                    class="w-4 h-4 text-gray-900 dark:text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-200 dark:focus:ring-indigo-500 dark:bg-gray-700"
+                  />
+                  <div class="ml-3">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Tema escuro</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Interface sempre em modo escuro</p>
+                  </div>
+                </label>
+                
+                <label class="flex items-center cursor-pointer">
+                  <input
+                    type="radio"
+                    :value="'system'"
+                    v-model="configuracoes.temaMode"
+                    class="w-4 h-4 text-gray-900 dark:text-indigo-600 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-gray-200 dark:focus:ring-indigo-500 dark:bg-gray-700"
+                  />
+                  <div class="ml-3">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white">Seguir dispositivo</span>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Acompanha a configuração do seu dispositivo</p>
+                  </div>
+                </label>
               </div>
-              <button
-                @click="toggleTema"
-                class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200"
-                :class="configuracoes.temaEscuro ? 'bg-gray-900 dark:bg-indigo-600' : 'bg-gray-200 dark:bg-gray-600'"
-              >
-                <span
-                  class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform duration-200"
-                  :class="configuracoes.temaEscuro ? 'translate-x-6' : 'translate-x-1'"
-                />
-              </button>
             </div>
 
             <!-- Linguagem -->
@@ -249,12 +278,15 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useTheme, isDark } from '../composables/useTheme'
+import { useTheme, themeMode, isDark } from '../composables/useTheme'
+
+type ThemeMode = 'light' | 'dark' | 'system'
 
 interface Configuracoes {
   nome: string
   email: string
-  temaEscuro: boolean
+  temaMode: ThemeMode
+  temaEscuro: boolean // Manter para compatibilidade
   idioma: string
   fusoHorario: string
   notificacoes: {
@@ -265,12 +297,13 @@ interface Configuracoes {
   }
 }
 
-const { setTheme, syncWithConfig } = useTheme()
+const { setTheme, setThemeMode, syncWithConfig } = useTheme()
 
 const configuracoes = ref<Configuracoes>({
   nome: '',
   email: '',
-  temaEscuro: false,
+  temaMode: 'system',
+  temaEscuro: false, // Manter para compatibilidade
   idioma: 'pt-BR',
   fusoHorario: 'America/Sao_Paulo',
   notificacoes: {
@@ -286,19 +319,24 @@ onMounted(() => {
 })
 
 // Sincronizar estado do tema com o composable
-watch(() => isDark.value, (novoValor) => {
-  if (configuracoes.value.temaEscuro !== novoValor) {
-    configuracoes.value.temaEscuro = novoValor
+watch(() => themeMode.value, (novoValor) => {
+  if (configuracoes.value.temaMode !== novoValor) {
+    configuracoes.value.temaMode = novoValor
   }
 }, { immediate: true })
 
-// Observar mudanças no tema para atualizar o composable
-watch(() => configuracoes.value.temaEscuro, (novoValor) => {
-  setTheme(novoValor)
+// Sincronizar isDark para compatibilidade
+watch(() => isDark.value, (novoValor) => {
+  configuracoes.value.temaEscuro = novoValor
+}, { immediate: true })
+
+// Observar mudanças no modo de tema para atualizar o composable
+watch(() => configuracoes.value.temaMode, (novoValor) => {
+  setThemeMode(novoValor)
 })
 
-function toggleTema() {
-  configuracoes.value.temaEscuro = !configuracoes.value.temaEscuro
+function setTema(modo: ThemeMode) {
+  configuracoes.value.temaMode = modo
 }
 
 function carregarConfiguracoes() {
@@ -344,6 +382,7 @@ function resetarConfiguracoes() {
     configuracoes.value = {
       nome: '',
       email: '',
+      temaMode: 'system',
       temaEscuro: false,
       idioma: 'pt-BR',
       fusoHorario: 'America/Sao_Paulo',
