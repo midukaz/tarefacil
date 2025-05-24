@@ -3,11 +3,12 @@ import { onMounted } from 'vue'
 import AppNavbar from './components/AppNavbar.vue'
 import { useTheme } from './composables/useTheme'
 
-const { loadTheme } = useTheme()
+// Inicializar o tema - o composable se auto-inicializa no onMounted
+const { initialize } = useTheme()
 
-// Carregar tema na inicialização
+// Garantir inicialização mesmo se usado fora de componente montado
 onMounted(() => {
-  loadTheme()
+  initialize()
 })
 </script>
 

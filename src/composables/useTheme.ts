@@ -1,25 +1,35 @@
 import { ref, watch, onMounted } from 'vue'
 
 const isDark = ref(false)
+const isInitialized = ref(false)
 
 export function useTheme() {
   // Carregar tema salvo ou detectar preferência do sistema
   const loadTheme = () => {
-    const saved = localStorage.getItem('tarefacil-configuracoes')
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('tarefacil-configuracoes')
+      let themePreference = null
+      
+      if (saved) {
         const config = JSON.parse(saved)
-        isDark.value = config.temaEscuro || false
-      } catch {
-        // Detectar preferência do sistema se não houver configuração salva
-        isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+        themePreference = config.temaEscuro
       }
-    } else {
-      // Detectar preferência do sistema se não houver configuração salva
+      
+      // Se não há preferência salva, usar a do sistema
+      if (themePreference === null || themePreference === undefined) {
+        themePreference = window.matchMedia('(prefers-color-scheme: dark)').matches
+      }
+      
+      isDark.value = Boolean(themePreference)
+      applyTheme()
+      isInitialized.value = true
+    } catch (error) {
+      console.warn('Erro ao carregar tema, usando preferência do sistema:', error)
+      // Fallback para preferência do sistema
       isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+      applyTheme()
+      isInitialized.value = true
     }
-    
-    applyTheme()
   }
 
   // Aplicar tema na tag HTML
@@ -41,55 +51,99 @@ export function useTheme() {
 
   // Definir tema específico
   const setTheme = (dark: boolean) => {
-    isDark.value = dark
-    applyTheme()
-    saveTheme()
+    if (isDark.value !== dark) {
+      isDark.value = dark
+      applyTheme()
+      saveTheme()
+    }
   }
 
   // Salvar tema no localStorage
   const saveTheme = () => {
-    const saved = localStorage.getItem('tarefacil-configuracoes')
-    let config = {}
-    
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('tarefacil-configuracoes')
+      let config = {}
+      
+      if (saved) {
         config = JSON.parse(saved)
-      } catch {
-        config = {}
       }
+      
+      config = { ...config, temaEscuro: isDark.value }
+      localStorage.setItem('tarefacil-configuracoes', JSON.stringify(config))
+    } catch (error) {
+      console.error('Erro ao salvar tema:', error)
     }
-    
-    config = { ...config, temaEscuro: isDark.value }
-    localStorage.setItem('tarefacil-configuracoes', JSON.stringify(config))
   }
 
   // Observar mudanças de preferência do sistema
   const setupSystemThemeListener = () => {
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    
-    mediaQuery.addEventListener('change', (e) => {
-      // Só aplicar se não houver preferência salva
-      const saved = localStorage.getItem('tarefacil-configuracoes')
-      if (!saved) {
-        isDark.value = e.matches
-        applyTheme()
+    try {
+      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      
+      const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+        // Só aplicar se não houver preferência específica salva
+        const saved = localStorage.getItem('tarefacil-configuracoes')
+        if (!saved) {
+          isDark.value = e.matches
+          applyTheme()
+        } else {
+          try {
+            const config = JSON.parse(saved)
+            // Se não há configuração de tema específica, usar a do sistema
+            if (config.temaEscuro === null || config.temaEscuro === undefined) {
+              isDark.value = e.matches
+              applyTheme()
+            }
+          } catch {
+            // Se erro ao parsear, usar preferência do sistema
+            isDark.value = e.matches
+            applyTheme()
+          }
+        }
       }
-    })
+      
+      mediaQuery.addEventListener('change', handleSystemThemeChange)
+      
+      // Retornar função de cleanup
+      return () => {
+        mediaQuery.removeEventListener('change', handleSystemThemeChange)
+      }
+    } catch (error) {
+      console.warn('Erro ao configurar listener do sistema:', error)
+      return () => {} // Função vazia como fallback
+    }
   }
 
-  // Inicializar tema quando o composable for usado
+  // Sincronizar com configurações externas
+  const syncWithConfig = (config: any) => {
+    if (config && typeof config.temaEscuro === 'boolean') {
+      setTheme(config.temaEscuro)
+    }
+  }
+
+  // Inicializar apenas uma vez
+  const initialize = () => {
+    if (!isInitialized.value) {
+      loadTheme()
+      setupSystemThemeListener()
+    }
+  }
+
+  // Auto-inicializar quando usado em componente
   onMounted(() => {
-    loadTheme()
-    setupSystemThemeListener()
+    initialize()
   })
 
   return {
     isDark,
+    isInitialized,
     toggleTheme,
     setTheme,
-    loadTheme
+    loadTheme,
+    initialize,
+    syncWithConfig
   }
 }
 
 // Exportar estado reativo para uso global
-export { isDark } 
+export { isDark, isInitialized } 

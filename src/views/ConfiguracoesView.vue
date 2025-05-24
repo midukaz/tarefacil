@@ -249,7 +249,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, watch } from 'vue'
-import { useTheme } from '../composables/useTheme'
+import { useTheme, isDark } from '../composables/useTheme'
 
 interface Configuracoes {
   nome: string
@@ -265,7 +265,7 @@ interface Configuracoes {
   }
 }
 
-const { setTheme } = useTheme()
+const { setTheme, syncWithConfig } = useTheme()
 
 const configuracoes = ref<Configuracoes>({
   nome: '',
@@ -285,7 +285,14 @@ onMounted(() => {
   carregarConfiguracoes()
 })
 
-// Observar mudanças no tema para atualizar o toggle
+// Sincronizar estado do tema com o composable
+watch(() => isDark.value, (novoValor) => {
+  if (configuracoes.value.temaEscuro !== novoValor) {
+    configuracoes.value.temaEscuro = novoValor
+  }
+}, { immediate: true })
+
+// Observar mudanças no tema para atualizar o composable
 watch(() => configuracoes.value.temaEscuro, (novoValor) => {
   setTheme(novoValor)
 })
@@ -300,6 +307,8 @@ function carregarConfiguracoes() {
     try {
       const parsed = JSON.parse(saved)
       configuracoes.value = { ...configuracoes.value, ...parsed }
+      // Sincronizar com o composable de tema
+      syncWithConfig(parsed)
     } catch (error) {
       console.error('Erro ao carregar configurações:', error)
     }
