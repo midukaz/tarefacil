@@ -6,7 +6,7 @@ O módulo de dark mode foi completamente reformulado para suportar **3 opções 
 
 1. **🌞 Tema Claro** - Interface sempre em modo claro
 2. **🌙 Tema Escuro** - Interface sempre em modo escuro  
-3. **🔄 Seguir Dispositivo** - Acompanha a configuração do sistema operacional
+3. **🔄 Seguir Dispositivo** (padrão) - Acompanha automaticamente a preferência do SO e responde a mudanças em tempo real
 
 ## 🆕 Principais Melhorias Implementadas
 
@@ -60,6 +60,16 @@ O módulo de dark mode foi completamente reformulado para suportar **3 opções 
 - Dark mode completo nos dialogs/modais de criação e edição
 - Transições suaves com `transition-colors duration-200`
 - Consistência visual em toda a aplicação
+
+### 5. **Cards/Listas sem Dark Mode**
+**Problema:** Os componentes ListaTarefas, ListaEventos e ListaRotinas não tinham suporte ao dark mode.
+
+**Solução:**
+- **ListaTarefas.vue**: Adicionadas classes dark em cards, badges de status/prioridade, botões de ação, tags, subtarefas, checkboxes e barras de progresso
+- **ListaEventos.vue**: Corrigidos cards, badges de status/prioridade/categoria, botões de ação, lembretes e informações de rodapé
+- **ListaRotinas.vue**: Aplicado dark mode em cards, badges ativo/inativo, dias da semana, tarefas da rotina e indicadores de progresso
+- **Transições suaves**: `transition-colors duration-200` em todos os elementos
+- **Estados hover consistentes**: Cores adequadas para light/dark mode
 
 ## 🚀 Novas Funcionalidades
 
@@ -157,6 +167,27 @@ if (typeof config.temaEscuro === 'boolean') {
    - Adicionadas classes `dark:` completas no formulário
    - Dark mode nos seletores de dias da semana
    - Suporte ao dark mode em tarefas da rotina
+
+9. **`src/components/tarefas/ListaTarefas.vue`**
+   - Cards com dark mode completo
+   - Badges de status e prioridade com variantes dark
+   - Botões de ação com estados hover corretos
+   - Tags e subtarefas com suporte escuro
+   - Checkboxes e barras de progresso temáticas
+
+10. **`src/components/eventos/ListaEventos.vue`**
+    - Cards de eventos com dark mode
+    - Badges de status, prioridade e categoria
+    - Botões de ação temáticos
+    - Lembretes com cores adequadas
+    - Informações de data e status com dark mode
+
+11. **`src/components/rotinas/ListaRotinas.vue`**
+    - Cards de rotinas com suporte dark
+    - Badges ativo/inativo e horário
+    - Tags de dias da semana temáticas
+    - Tarefas da rotina com checkboxes dark
+    - Indicadores de progresso consistentes
 
 ## 🎯 Benefícios das Melhorias
 

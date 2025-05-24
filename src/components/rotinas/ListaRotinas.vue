@@ -5,38 +5,38 @@
       <div
         v-for="rotina in rotinas"
         :key="rotina.id"
-        class="group bg-white border border-gray-100 rounded-xl p-6 hover:shadow-md hover:border-gray-200 transition-all duration-200"
+        class="group bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 rounded-xl p-6 hover:shadow-md hover:border-gray-200 dark:hover:border-gray-600 transition-all duration-200"
       >
         <!-- Cabeçalho da rotina -->
         <div class="flex items-start justify-between mb-4">
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-3 mb-2">
-              <h3 class="text-lg font-medium text-gray-900 truncate">{{ rotina.titulo }}</h3>
+              <h3 class="text-lg font-medium text-gray-900 dark:text-white truncate">{{ rotina.titulo }}</h3>
               <div class="flex gap-1.5">
                 <!-- Status ativo/inativo -->
                 <span
                   :class="{
-                    'bg-green-50 text-green-700 border-green-200': rotina.ativa,
-                    'bg-gray-50 text-gray-600 border-gray-200': !rotina.ativa
+                    'bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-400 border-green-200 dark:border-green-800': rotina.ativa,
+                    'bg-gray-50 dark:bg-gray-700 text-gray-600 dark:text-gray-400 border-gray-200 dark:border-gray-600': !rotina.ativa
                   }"
                   class="px-2 py-1 text-xs font-medium rounded-md border"
                 >
                   {{ rotina.ativa ? 'Ativa' : 'Inativa' }}
                 </span>
                 <!-- Horário -->
-                <span class="px-2 py-1 text-xs font-medium bg-blue-50 text-blue-700 border border-blue-200 rounded-md">
+                <span class="px-2 py-1 text-xs font-medium bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400 border border-blue-200 dark:border-blue-800 rounded-md">
                   {{ rotina.horario }}
                 </span>
               </div>
             </div>
-            <p v-if="rotina.descricao" class="text-sm text-gray-600 leading-relaxed mb-3">{{ rotina.descricao }}</p>
+            <p v-if="rotina.descricao" class="text-sm text-gray-600 dark:text-gray-400 leading-relaxed mb-3">{{ rotina.descricao }}</p>
             
             <!-- Dias da semana -->
             <div class="flex flex-wrap gap-1">
               <span
                 v-for="dia in rotina.diasSemana"
                 :key="dia"
-                class="px-2 py-1 text-xs font-medium bg-amber-50 text-amber-700 rounded-md"
+                class="px-2 py-1 text-xs font-medium bg-amber-50 dark:bg-amber-900/20 text-amber-700 dark:text-amber-400 rounded-md"
               >
                 {{ diasSemanaLabel[dia] }}
               </span>
@@ -47,7 +47,7 @@
           <div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
             <button
               @click="$emit('toggle-ativa', rotina.id, !rotina.ativa)"
-              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
               :title="rotina.ativa ? 'Desativar rotina' : 'Ativar rotina'"
             >
               <svg v-if="rotina.ativa" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -60,7 +60,7 @@
             <button
               v-if="rotina.ativa"
               @click="$emit('executar', rotina.id)"
-              class="p-2 text-gray-400 hover:text-green-500 hover:bg-green-50 rounded-lg transition-colors"
+              class="p-2 text-gray-400 dark:text-gray-500 hover:text-green-500 dark:hover:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-colors"
               title="Executar rotina"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -69,7 +69,7 @@
             </button>
             <button
               @click="$emit('editar', rotina)"
-              class="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+              class="p-2 text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
               title="Editar rotina"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -78,7 +78,7 @@
             </button>
             <button
               @click="$emit('excluir', rotina.id)"
-              class="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+              class="p-2 text-gray-400 dark:text-gray-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
               title="Excluir rotina"
             >
               <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -90,23 +90,23 @@
 
         <!-- Tarefas da rotina -->
         <div v-if="rotina.tarefas.length > 0" class="mb-4">
-          <h4 class="text-sm font-medium text-gray-700 mb-3">Tarefas</h4>
+          <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Tarefas</h4>
           <div class="space-y-2">
             <label
               v-for="tarefa in rotina.tarefas"
               :key="tarefa.id"
-              class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors cursor-pointer"
+              class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer"
             >
               <input
                 type="checkbox"
                 :checked="tarefa.concluida"
                 @change="handleTarefaChange(rotina.id, tarefa.id, $event)"
-                class="w-4 h-4 rounded border-gray-300 text-gray-900 focus:ring-gray-200 focus:ring-2"
+                class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-gray-900 dark:text-indigo-600 focus:ring-gray-200 dark:focus:ring-indigo-500 focus:ring-2 dark:bg-gray-700"
               />
               <span
                 :class="{
-                  'text-gray-500 line-through': tarefa.concluida,
-                  'text-gray-700': !tarefa.concluida
+                  'text-gray-500 dark:text-gray-400 line-through': tarefa.concluida,
+                  'text-gray-700 dark:text-gray-300': !tarefa.concluida
                 }"
                 class="text-sm flex-1"
               >
@@ -117,8 +117,8 @@
         </div>
 
         <!-- Rodapé com informações -->
-        <div class="flex items-center justify-between pt-4 border-t border-gray-50">
-          <div class="text-xs text-gray-400">
+        <div class="flex items-center justify-between pt-4 border-t border-gray-50 dark:border-gray-700">
+          <div class="text-xs text-gray-400 dark:text-gray-500">
             Criada em {{ new Date(rotina.dataCriacao).toLocaleDateString('pt-BR') }}
             <span v-if="rotina.ultimaExecucao" class="ml-2">
               • Última execução em {{ new Date(rotina.ultimaExecucao).toLocaleDateString('pt-BR') }}
@@ -126,11 +126,11 @@
           </div>
           
           <!-- Indicador de progresso das tarefas -->
-          <div v-if="rotina.tarefas.length > 0" class="flex items-center gap-2 text-xs text-gray-500">
+          <div v-if="rotina.tarefas.length > 0" class="flex items-center gap-2 text-xs text-gray-500 dark:text-gray-400">
             <span>{{ tarefasConcluidas(rotina) }}/{{ rotina.tarefas.length }}</span>
-            <div class="w-12 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div class="w-12 h-1.5 bg-gray-100 dark:bg-gray-700 rounded-full overflow-hidden">
               <div 
-                class="h-full bg-gray-400 rounded-full transition-all duration-300"
+                class="h-full bg-gray-400 dark:bg-gray-500 rounded-full transition-all duration-300"
                 :style="{ width: `${progressoTarefas(rotina)}%` }"
               ></div>
             </div>
